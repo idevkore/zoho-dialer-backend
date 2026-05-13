@@ -64,12 +64,21 @@ $ACTIVATE_RELEASE()
 
 cd $FORGE_SITE_PATH
 
-pm2 delete zoho-dialer-backend 2>/dev/null || true
-pm2 start ecosystem.config.cjs --update-env --env production
-pm2 save
+bash ./scripts/pm2-forge-resync.sh
 ```
 
-Always **`pm2 delete`** then **`pm2 start ecosystem.config.cjs`** here (not only `pm2 restart`). If the app was first started with a raw `node …/src/server.js` path, **`restart` keeps that stale config** and ignores `cwd`, `error_file`, and other ecosystem fields — which matches “502 + nothing on :3000”.
+Always run **`bash ./scripts/pm2-forge-resync.sh`** (or the equivalent `pm2 delete` + `pm2 start ecosystem.config.cjs`). **`pm2 restart` never re-reads `ecosystem.config.cjs`**, so if the app was ever started with a raw `node …/releases/<old>/src/server.js`, **`describe` will keep pointing at that old release** until you **delete** the process and **start** from the ecosystem file again.
+
+### PM2 `describe` shows an old `releases/…` path
+
+Compare:
+
+```bash
+readlink -f ~/haulos-zoho-dialer-backend.atiny.cloud/current
+pm2 describe zoho-dialer-backend | grep -E 'script path|exec cwd'
+```
+
+If the **`releases/<id>`** in `describe` is **older** than `readlink -f current`, your Forge deploy script is still only **`pm2 restart`** (or never runs `delete` + `start` from **`current`**). Fix the deploy script to match the block above, deploy once, then re-check `describe`.
 
 Forge defines **`$FORGE_SITE_PATH`** as the **deployment root**, which is already the `current` symlink (e.g. `/home/forge/example.com/current`). Do **not** append `/current` again or `cd` will fail with `.../current/current`. Use **`$FORGE_SITE_ROOT`** for the parent directory (e.g. `/home/forge/example.com`) when you need the site home without `current`.
 
@@ -88,14 +97,14 @@ Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH`** so `eco
 
    (Adjust the `.env` path to your site directory if different.)
 
-2. **PM2 logs** — this repo writes to stable files under **`~/.pm2/logs/`** (works in SSH; no `$FORGE_*` vars needed):
+2. **PM2 logs** — after a successful **`pm2-forge-resync`**, this repo uses:
 
    ```bash
    tail -n 100 ~/.pm2/logs/zoho-dialer-backend.stderr.log
    tail -n 100 ~/.pm2/logs/zoho-dialer-backend.stdout.log
    ```
 
-   If those files do not exist, PM2 never successfully started with this repo’s `ecosystem.config.cjs`. Run **`pm2 describe zoho-dialer-backend`** and use the printed **error log path** / **out log path**, or:
+   If **`pm2 describe`** still shows **`zoho-dialer-backend-error-0.log`** / **`out-0.log`**, the process was **never** recreated with the current `ecosystem.config.cjs` (stuck on an old `pm2 start` registration). Run **`bash ./scripts/pm2-forge-resync.sh`** from **`current`**, then tail the **`.stderr.log` / `.stdout.log`** paths again (or use whatever paths `describe` prints).
 
    ```bash
    pm2 logs zoho-dialer-backend --lines 200 --nostream
@@ -109,8 +118,7 @@ After changing `ecosystem.config.cjs`, recreate the process so PM2 picks up `cwd
 
 ```bash
 cd ~/YOUR_SITE/current
-pm2 delete zoho-dialer-backend 2>/dev/null
-pm2 start ecosystem.config.cjs --update-env --env production && pm2 save
+bash ./scripts/pm2-forge-resync.sh
 ```
 
 To stream logs without remembering filenames:
