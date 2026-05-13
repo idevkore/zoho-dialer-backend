@@ -47,4 +47,22 @@ In **production**, set `PUBLIC_BASE_URL` to the same origin Twilio uses (require
 
 ## Laravel Forge
 
-Create the site from `idevkore/zoho-dialer-backend`, set environment variables in Forge, deploy command `npm ci && npm start` (or your PM2/foreman setup), and map the daemon/web process to `node src/server.js` on the configured `PORT`.
+Create the site from `idevkore/zoho-dialer-backend`, configure the **deploy branch** (e.g. `dev`), set environment variables in Forge (including `PORT`, `NODE_ENV`, `PUBLIC_BASE_URL`, `JWT_SECRET`, and tenant-prefixed secrets), and point Nginx at the Node process listening on `PORT`.
+
+New Forge sites often use **zero-downtime deployments**. In that case the deploy script must use Forge’s release macros; a plain `git pull` in the site root will fail because there is no `.git` there. Example deploy script that works with this repo and **PM2** (`ecosystem.config.cjs` in the project root):
+
+```bash
+$CREATE_RELEASE()
+
+cd $FORGE_RELEASE_DIRECTORY
+
+npm ci --omit=dev
+
+$ACTIVATE_RELEASE()
+
+cd $FORGE_SITE_PATH
+
+pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.config.cjs --update-env --env production
+```
+
+Run **PM2 only after** `$ACTIVATE_RELEASE()` so the process serves the new `current` release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
