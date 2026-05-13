@@ -33,6 +33,8 @@ Mount paths are under **`/api/v1`** (Forge/Nginx should forward to this app):
 
 | Use | URL pattern |
 | --- | --- |
+| Health (use this if Nginx only proxies `/api`) | `https://<your-domain>/api/v1/health` |
+| Health (root; needs Nginx to proxy `/` to Node) | `https://<your-domain>/health` |
 | Voice (TwiML App) | `https://<your-domain>/api/v1/voice?tenantId=<slug>` |
 | Status / recording callback | `https://<your-domain>/api/v1/events?tenantId=<slug>` |
 | Inbound (number webhook) | `https://<your-domain>/api/v1/inbound` (tenant resolved via `TWILIO_*_INBOUND_NUMBER` match on `To`, or add `?tenantId=`). |
