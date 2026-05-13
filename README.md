@@ -88,27 +88,24 @@ Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH`** so `eco
 
    (Adjust the `.env` path to your site directory if different.)
 
-2. **PM2 logs** live under the **activated release** (`current`). After `cd` there, use **relative** paths:
+2. **PM2 logs** — this repo writes to stable files under **`~/.pm2/logs/`** (works in SSH; no `$FORGE_*` vars needed):
 
    ```bash
-   cd ~/haulos-zoho-dialer-backend.atiny.cloud/current
-   tail -n 100 storage/logs/pm2-error.log
-   tail -n 100 storage/logs/pm2-out.log
+   tail -n 100 ~/.pm2/logs/zoho-dialer-backend.stderr.log
+   tail -n 100 ~/.pm2/logs/zoho-dialer-backend.stdout.log
    ```
 
-   If those files do not exist yet, PM2 has not successfully started with this repo’s `ecosystem.config.cjs` (or logs are still under `~/.pm2/logs/`). Use **`pm2 describe zoho-dialer-backend`** for the paths PM2 is using.
+   If those files do not exist, PM2 never successfully started with this repo’s `ecosystem.config.cjs`. Run **`pm2 describe zoho-dialer-backend`** and use the printed **error log path** / **out log path**, or:
+
+   ```bash
+   pm2 logs zoho-dialer-backend --lines 200 --nostream
+   ```
 
 3. In Forge **Daemons**, ensure you are **not** also running a second Node command for the same app that conflicts with PM2.
 
-This repo pins PM2 output to **`storage/logs/`** next to the deployed code (see `ecosystem.config.cjs`):
+### PM2: first-time start or reload ecosystem
 
-```bash
-cd ~/YOUR_SITE/current
-tail -n 200 storage/logs/pm2-error.log
-tail -n 200 storage/logs/pm2-out.log
-```
-
-After changing `error_file` / `out_file` in the ecosystem, recreate the process once so PM2 picks up paths:
+After changing `ecosystem.config.cjs`, recreate the process so PM2 picks up `cwd`, env, and log paths:
 
 ```bash
 cd ~/YOUR_SITE/current
@@ -116,7 +113,7 @@ pm2 delete zoho-dialer-backend 2>/dev/null
 pm2 start ecosystem.config.cjs --update-env --env production && pm2 save
 ```
 
-PM2’s default files (`~/.pm2/logs/<name>-error-0.log`) only apply if the process was **never** started with this ecosystem’s `error_file` — or use **`pm2 describe zoho-dialer-backend`** and copy the **exact** `error log path` / `out log path` lines. To stream both streams without guessing filenames:
+To stream logs without remembering filenames:
 
 ```bash
 pm2 logs zoho-dialer-backend --lines 200 --nostream

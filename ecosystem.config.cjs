@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 
 /**
@@ -6,11 +7,11 @@ const path = require('node:path');
  * Deploy (Forge): from `$FORGE_SITE_PATH`, run `pm2 delete …` then
  * `pm2 start ecosystem.config.cjs --update-env --env production` so this file is always applied.
  *
- * Fixed log paths under `storage/logs/` so you can always:
- *   tail -f storage/logs/pm2-error.log
- * from the app root (`current/` on Forge), instead of hunting `~/.pm2/logs/*-error-0.log`.
+ * Logs go under `~/.pm2/logs/` (always present for the `forge` user). Writing only under
+ * `current/storage/logs/` fails silently from the operator’s perspective if PM2 never
+ * successfully loads this ecosystem (stale process, wrong cwd, or start never ran).
  */
-const logDir = path.join(__dirname, 'storage', 'logs');
+const logDir = path.join(os.homedir(), '.pm2', 'logs');
 fs.mkdirSync(logDir, { recursive: true });
 
 module.exports = {
@@ -23,8 +24,8 @@ module.exports = {
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
-      error_file: path.join(logDir, 'pm2-error.log'),
-      out_file: path.join(logDir, 'pm2-out.log'),
+      error_file: path.join(logDir, 'zoho-dialer-backend.stderr.log'),
+      out_file: path.join(logDir, 'zoho-dialer-backend.stdout.log'),
       merge_logs: false,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       env: {
