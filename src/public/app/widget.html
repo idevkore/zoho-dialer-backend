@@ -6,11 +6,11 @@
     <title>HaulOS — Dialer</title>
     <link rel="stylesheet" href="./css/dialer.css" />
     <!--
-      Zoho injects window.ZOHO when the widget runs inside CRM.
-      In zet local preview (https://127.0.0.1) ZOHO may be absent — app.js shows an error state.
-      Floating telephony widgets receive Dial / DialerActive events like page-embedded telephony;
-      some ZOHO.CRM.UI helpers differ from record-embedded widgets (see zoho-context.js).
+      CRM does not always expose window.ZOHO without the Embedded App SDK. Load it before our
+      module code so ZOHO.embeddedApp (PageLoad, Dial, etc.) exists in production and local zet preview.
+      CDN: https://help.zwidgets.com/help/v1.2/index.html
     -->
+    <script src="https://live.zwidgets.com/js-sdk/1.3/ZohoEmbededAppSDK.min.js"></script>
     <script
       src="https://unpkg.com/@twilio/voice-sdk@2.12.0/dist/twilio.min.js"
       crossorigin="anonymous"
