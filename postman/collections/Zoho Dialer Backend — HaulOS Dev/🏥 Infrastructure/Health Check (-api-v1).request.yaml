@@ -1,8 +1,6 @@
 $kind: http-request
 name: Health Check (/api/v1)
-description: Duplicate health under API prefix for Nginx `/api/*` routing (`src/routes/index.js`).
-url: "{{baseUrl}}/api/v1/health?tenantId=kore"
+description: API-prefix health (`src/server.js` — registered on the root app before `/api/v1` so this never hits Twilio webhook middleware). Do not add `tenantId` query params.
+url: "{{baseUrl}}/api/v1/health"
 method: GET
-queryParams:
-  tenantId: kore
 order: 2000

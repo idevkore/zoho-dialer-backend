@@ -1,13 +1,11 @@
 $kind: http-request
 description: |-
-  After Zoho redirects the browser to your redirect URL with `?code=...`, call this endpoint with that **one-time** `code` and your **tenantId** (same slug as in env vars, e.g. `kore`).
+  Exchanges Zoho's one-time `code` for a `refresh_token` (`src/routes/zohoOAuth.js`). Requires `ZOHO_*_CLIENT_ID`, `ZOHO_*_CLIENT_SECRET`, and `ZOHO_*_REDIRECT_URI` or `PUBLIC_BASE_URL`. Not a Twilio webhook.
 
-  Requires **`ZOHO_{tenant}_CLIENT_ID`**, **`ZOHO_{tenant}_CLIENT_SECRET`**, and either **`ZOHO_{tenant}_REDIRECT_URI`** or **`PUBLIC_BASE_URL`** (default redirect = `{PUBLIC_BASE_URL}/api/v1/zoho/oauth/callback`). The redirect URI must match what you registered in Zoho API Console.
-
-  Response includes **`refresh_token`** — set it as **`ZOHO_{tenant}_REFRESH_TOKEN`** in Forge / `.env`. This route is **not** a Twilio webhook (no `X-Twilio-Signature`).
-url: "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER&tenantId=kore"
+  After the browser redirect, the URL usually includes `code` and `state` (if you used `&state=kore` on the authorize URL). This request uses `tenantId` query param; either works on the server (`tenantId` overrides `state` if both are set).
+url: "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER&tenantId={{tenantId}}"
 method: GET
 queryParams:
   code: PLACEHOLDER
-  tenantId: kore
+  tenantId: "{{tenantId}}"
 order: 2000

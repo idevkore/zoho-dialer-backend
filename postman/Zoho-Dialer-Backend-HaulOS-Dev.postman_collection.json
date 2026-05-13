@@ -143,7 +143,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER&tenantId={{tenantId}}",
-            "description": "Exchanges Zoho's one-time `code` for a `refresh_token` (`src/routes/zohoOAuth.js`). Requires `ZOHO_*_CLIENT_ID`, `ZOHO_*_CLIENT_SECRET`, and `ZOHO_*_REDIRECT_URI` or `PUBLIC_BASE_URL`. Not a Twilio webhook."
+            "description": "Exchanges Zoho's one-time `code` for a `refresh_token` (`src/routes/zohoOAuth.js`). Tenant: `tenantId` query or `state` from authorize URL (`&state=kore`). Requires Zoho client env + redirect. Not a Twilio webhook."
           },
           "response": []
         }
