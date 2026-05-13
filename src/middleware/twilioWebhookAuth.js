@@ -1,6 +1,13 @@
 import twilio from 'twilio';
 import { config } from '../config/index.js';
 
+function skipTwilioSigValidationEnabled() {
+  const v = String(process.env.SKIP_TWILIO_SIG_VALIDATION ?? '')
+    .trim()
+    .toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes';
+}
+
 /**
  * Validate Twilio webhook `X-Twilio-Signature` (HMAC-SHA1 over full URL + sorted form params).
  *
@@ -16,8 +23,7 @@ import { config } from '../config/index.js';
  * @param {import('express').NextFunction} next
  */
 export function twilioWebhookAuth(req, res, next) {
-  const skipForDev =
-    config.nodeEnv !== 'production' && process.env.SKIP_TWILIO_SIG_VALIDATION === 'true';
+  const skipForDev = config.nodeEnv !== 'production' && skipTwilioSigValidationEnabled();
 
   if (skipForDev) {
     return next();
