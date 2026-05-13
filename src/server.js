@@ -36,6 +36,8 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: message });
 });
 
-app.listen(config.port, () => {
-  console.log(`Listening on :${config.port} (${config.nodeEnv})`);
+/** Bind IPv4 so Nginx `proxy_pass http://127.0.0.1:PORT` can connect (avoid ::-only listen). */
+const listenHost = '0.0.0.0';
+app.listen(config.port, listenHost, () => {
+  console.log(`Listening on http://${listenHost}:${config.port} (${config.nodeEnv})`);
 });
