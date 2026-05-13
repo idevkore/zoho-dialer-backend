@@ -1,4 +1,4 @@
-/* HaulOS softphone — max 320px; flex/grid use min-width:0 so narrow Zoho panels do not clip */
+/* HaulOS softphone in Zoho iframe: full bleed; flex/grid use min-width:0 to avoid clip */
 
 :root {
   --haulos-navy: #0d1b2a;
@@ -33,6 +33,7 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  background: var(--bg);
 }
 
 body {
@@ -45,9 +46,10 @@ body {
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
-  background: transparent;
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -57,12 +59,13 @@ body {
 
 .dialer {
   /* min-width:0 — flex item may not shrink below content otherwise (clips in narrow Zoho panels) */
-  max-width: min(320px, 100%);
   width: 100%;
+  max-width: 100%;
   min-width: 0;
+  align-self: stretch;
   flex: 1 1 auto;
   min-height: 0;
-  margin: 0 auto;
+  margin: 0;
   padding: 10px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   overflow-x: hidden;
@@ -72,9 +75,9 @@ body {
   flex-direction: column;
   gap: 0;
   background: var(--bg);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   transition: opacity var(--transition), transform var(--transition);
 }
 
@@ -83,7 +86,8 @@ body {
 }
 
 .dialer--error {
-  border-color: rgba(244, 98, 42, 0.35);
+  outline: 2px solid rgba(244, 98, 42, 0.45);
+  outline-offset: -2px;
 }
 
 .dialer__header {
