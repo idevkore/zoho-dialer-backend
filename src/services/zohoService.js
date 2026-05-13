@@ -65,9 +65,17 @@ export async function getAccessToken(tenantConfig) {
 }
 
 /**
- * Create a Calls activity in Zoho CRM.
+ * Create a Calls activity in Zoho CRM (v8 field names: Call_Type, Call_Start_Time, Call_Duration mm:ss).
  * @param {string} contactId Zoho Contact id
- * @param {Record<string, unknown>} callData Twilio-derived fields
+ * @param {{
+ *   Subject?: string;
+ *   Call_Type: string;
+ *   Call_Start_Time: string; // yyyy-MM-ddTHH:mm:ss±HH:mm (Zoho v8)
+ *   Call_Duration: string;
+ *   Description?: string;
+ *   Outbound_Call_Status?: string;
+ *   Recording_URL?: string;
+ * }} callData
  * @param {TenantConfig} tenantConfig
  * @returns {Promise<unknown>}
  */
@@ -75,19 +83,19 @@ export async function createCallActivity(contactId, callData, tenantConfig) {
   const accessToken = await getAccessToken(tenantConfig);
   const url = `${tenantConfig.zohoApiDomain}/crm/v8/Calls`;
 
-  const payload = {
-    data: [
-      {
-        Subject: callData.Subject ?? 'Phone call',
-        Call_Duration: callData.Call_Duration,
-        Description: callData.Description,
-        Call_Result: callData.Call_Result,
-        Who_Id: { id: contactId },
-        Call_Direction: callData.Call_Direction,
-        Recording_URL: callData.Recording_URL,
-      },
-    ],
+  /** @see https://www.zoho.com/crm/developer/docs/api/v8/insert-records.html (Calls) */
+  const row = {
+    Subject: callData.Subject ?? 'Phone call',
+    Call_Type: callData.Call_Type,
+    Call_Start_Time: callData.Call_Start_Time,
+    Call_Duration: callData.Call_Duration,
+    Who_Id: { id: contactId },
   };
+  if (callData.Description) row.Description = callData.Description;
+  if (callData.Outbound_Call_Status) row.Outbound_Call_Status = callData.Outbound_Call_Status;
+  if (callData.Recording_URL) row.Recording_URL = callData.Recording_URL;
+
+  const payload = { data: [row] };
 
   const { data } = await axios.post(url, payload, {
     headers: {
@@ -100,10 +108,12 @@ export async function createCallActivity(contactId, callData, tenantConfig) {
   if (data?.data?.[0]?.code === 'SUCCESS') {
     return data;
   }
-  if (data?.data?.[0]?.message) {
-    throw new Error(`Zoho Calls create failed: ${data.data[0].message}`);
-  }
-  throw new Error(`Zoho Calls create failed: ${JSON.stringify(data).slice(0, 500)}`);
+  const first = data?.data?.[0];
+  const detail =
+    first?.message ||
+    first?.details ||
+    (typeof first === 'object' ? JSON.stringify(first) : String(first));
+  throw new Error(`Zoho Calls create failed: ${detail || JSON.stringify(data).slice(0, 500)}`);
 }
 
 /**
