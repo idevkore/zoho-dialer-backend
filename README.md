@@ -77,11 +77,28 @@ Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH`** so `eco
 
 ### 502 and nothing on port 3000
 
-1. Confirm **Nginx** `proxy_pass` uses the same port as **`PORT`** in the site `.env` (Forge → Site → Environment). `grep ^PORT= $FORGE_SITE_ROOT/.env` then `ss -tlnp | grep that-port`.
-2. **`tail -n 100 $FORGE_SITE_PATH/storage/logs/pm2-error.log`** (and `pm2-out.log`) right after deploy.
-3. In Forge **Daemons**, ensure you are **not** also running a second Node command for the same app that conflicts with PM2.
+**Note:** `$FORGE_SITE_PATH` and `$FORGE_SITE_ROOT` exist **only while Forge runs the deploy script**. In normal SSH they are usually **empty** — do not use them in `tail`/`grep` by hand unless you `export` them yourself.
 
-### PM2 logs (where to look)
+1. Confirm **Nginx** `proxy_pass` uses the same port as **`PORT`** in the site `.env`. From the server (site root is the parent of `current`):
+
+   ```bash
+   grep ^PORT= ~/haulos-zoho-dialer-backend.atiny.cloud/.env
+   ss -tlnp | grep node
+   ```
+
+   (Adjust the `.env` path to your site directory if different.)
+
+2. **PM2 logs** live under the **activated release** (`current`). After `cd` there, use **relative** paths:
+
+   ```bash
+   cd ~/haulos-zoho-dialer-backend.atiny.cloud/current
+   tail -n 100 storage/logs/pm2-error.log
+   tail -n 100 storage/logs/pm2-out.log
+   ```
+
+   If those files do not exist yet, PM2 has not successfully started with this repo’s `ecosystem.config.cjs` (or logs are still under `~/.pm2/logs/`). Use **`pm2 describe zoho-dialer-backend`** for the paths PM2 is using.
+
+3. In Forge **Daemons**, ensure you are **not** also running a second Node command for the same app that conflicts with PM2.
 
 This repo pins PM2 output to **`storage/logs/`** next to the deployed code (see `ecosystem.config.cjs`):
 
