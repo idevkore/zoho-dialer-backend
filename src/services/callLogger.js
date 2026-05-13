@@ -169,3 +169,67 @@ export async function logCompletedCallToZoho(payload, tenantConfig) {
     console.error('[callLogger] Failed to log call to Zoho:', err);
   }
 }
+
+/**
+ * CRM widget POST /api/v1/log: client-reported duration + optional current record (Contacts).
+ * Resolves Contact by `zohoModule`/`zohoRecordId` when on Contacts, else phone search like Twilio flow.
+ *
+ * @param {Record<string, unknown>} body
+ * @param {import('../config/tenants.js').TenantConfig} tenantConfig
+ * @returns {Promise<void>}
+ */
+export async function logWidgetCallSummaryToZoho(body, tenantConfig) {
+  try {
+    const durationSec = Math.max(0, Math.floor(Number(body.duration) || 0));
+    const direction = String(body.direction || 'outbound').toLowerCase();
+    const toNumber = String(body.toNumber || '');
+    const fromNumber = String(body.fromNumber || '');
+    const callSid = String(body.callSid || '');
+    const zohoModule = String(body.zohoModule || '').trim();
+    const zohoRecordId = String(body.zohoRecordId || '').trim();
+
+    let contactId;
+    if (/^contacts$/i.test(zohoModule) && zohoRecordId) {
+      contactId = zohoRecordId;
+    } else {
+      const phoneCandidate = direction === 'inbound' ? fromNumber : toNumber || fromNumber;
+      contactId = await findContactIdByPhone(phoneCandidate, tenantConfig);
+    }
+
+    if (!contactId) {
+      console.warn(
+        `[callLogger] widget log: no Contact id (CallSid=${callSid || '-'} module=${zohoModule || '-'})`,
+      );
+      return;
+    }
+
+    const callType = direction === 'inbound' ? 'Inbound' : 'Outbound';
+    const mmSs = enforceZohoMinimumCallDuration(callType, formatZohoCallDurationMmSs(durationSec));
+    const startMs = durationSec > 0 ? Date.now() - durationSec * 1000 : Date.now();
+    const recordingUrl = callSid ? getRecordingUrl(callSid) : undefined;
+
+    const fields = {
+      Subject: callSid ? `Call ${callSid}` : 'Call (widget)',
+      Call_Type: callType,
+      Call_Start_Time: formatDateTimeForZohoUtc(startMs),
+      Call_Duration: mmSs,
+      Description: [
+        `CallSid: ${callSid}`,
+        `From: ${fromNumber}`,
+        `To: ${toNumber}`,
+        `Direction: ${direction}`,
+        zohoModule && zohoRecordId ? `CRM page: ${zohoModule}/${zohoRecordId}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      Outbound_Call_Status: callType === 'Outbound' ? 'Completed' : undefined,
+      Recording_URL:
+        recordingUrl && /^https?:\/\//i.test(recordingUrl) ? recordingUrl : undefined,
+    };
+
+    await createCallActivity(contactId, fields, tenantConfig);
+    console.info(`[callLogger] widget log CallSid=${callSid || '-'} → Zoho contact ${contactId}`);
+  } catch (err) {
+    console.error('[callLogger] widget log failed:', err);
+  }
+}
