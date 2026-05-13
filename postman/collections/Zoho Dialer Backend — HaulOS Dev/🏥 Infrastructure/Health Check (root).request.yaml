@@ -1,0 +1,5 @@
+$kind: http-request
+description: Root health probe (`src/server.js`).
+url: "{{baseUrl}}/health"
+method: GET
+order: 1000

@@ -1,0 +1,16 @@
+$kind: http-request
+name: TwiML Voice (outbound / client leg)
+description: Outbound call TwiML (`src/routes/voice.js`). Simulates Twilio POSTing to your voice webhook.
+url: "{{baseUrl}}/api/v1/voice"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+  X-Twilio-Signature: "{{twilioSignature}}"
+body:
+  type: urlencoded
+  content:
+    To: "+18005551234"
+    From: "+17605026799"
+    CallSid: CAtest123
+    tenantId: "{{tenantId}}"
+order: 1000

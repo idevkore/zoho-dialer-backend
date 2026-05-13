@@ -1,0 +1,17 @@
+$kind: http-request
+name: Events / Status Callback
+description: Recording + call status callbacks (`src/routes/events.js`).
+url: "{{baseUrl}}/api/v1/events"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+  X-Twilio-Signature: "{{twilioSignature}}"
+body:
+  type: urlencoded
+  content:
+    CallSid: CAtest123
+    CallStatus: completed
+    CallDuration: "47"
+    RecordingUrl: https://api.twilio.com/fake
+    tenantId: "{{tenantId}}"
+order: 3000

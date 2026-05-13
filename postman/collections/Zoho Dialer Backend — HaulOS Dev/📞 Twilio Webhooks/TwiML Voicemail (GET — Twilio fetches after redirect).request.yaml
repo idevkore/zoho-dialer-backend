@@ -1,0 +1,11 @@
+$kind: http-request
+description: Returns `<Play>` TwiML for voicemail audio (`src/routes/voicemail.js`). Requires valid `sig` query param.
+url: "{{baseUrl}}/api/v1/twiml/voicemail?sig={{voicemailTwimlSig}}"
+method: GET
+headers:
+  - key: X-Twilio-Signature
+    value: "{{twilioSignature}}"
+    description: Ignored for GET unless you add auth; Twilio validates when it requests this URL.
+queryParams:
+  sig: "{{voicemailTwimlSig}}"
+order: 5000

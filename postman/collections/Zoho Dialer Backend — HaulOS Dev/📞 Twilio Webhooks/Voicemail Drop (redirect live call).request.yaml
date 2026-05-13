@@ -1,0 +1,13 @@
+$kind: http-request
+description: JSON API to redirect a live call to voicemail TwiML (`src/routes/voicemail.js`). Body fields are **camelCase** `callSid` and `tenantId` (not Twilio-style `CallSid`).
+url: "{{baseUrl}}/api/v1/voicemail"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+  X-Twilio-Signature: "{{twilioSignature}}"
+body:
+  type: urlencoded
+  content:
+    callSid: CAtest123
+    tenantId: "{{tenantId}}"
+order: 4000

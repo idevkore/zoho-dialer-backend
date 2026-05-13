@@ -27,6 +27,8 @@ This keeps **main** trustworthy as “what shipped,” while **dev** stays the d
 
 Copy `.env.example` to `.env` and fill values. `JWT_SECRET` is required (used to sign short-lived TwiML URLs for voicemail drop).
 
+**Zoho refresh token:** register a server-based OAuth client in [Zoho API Console](https://api-console.zoho.com/), set **`ZOHO_{TENANT}_REDIRECT_URI`** (or rely on **`PUBLIC_BASE_URL`** + default path), then open Zoho’s authorize URL with `access_type=offline` and `prompt=consent`. After redirect, **`GET /api/v1/zoho/oauth/callback?code=...&tenantId=...`** exchanges the code and returns **`refresh_token`** JSON for you to paste into Forge as **`ZOHO_{TENANT}_REFRESH_TOKEN`**.
+
 ## Twilio console URLs
 
 Mount paths are under **`/api/v1`** (Forge/Nginx should forward to this app):

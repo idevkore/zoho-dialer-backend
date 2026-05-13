@@ -1,0 +1,23 @@
+$kind: http-request
+description: Issues a Twilio Voice SDK JWT (`src/routes/token.js`). Saves `token` to collection variable `twilioToken` on success.
+url: "{{baseUrl}}/api/v1/token?tenantId={{tenantId}}"
+method: GET
+headers:
+  - key: X-Tenant-ID
+    value: "{{tenantId}}"
+    description: Required by API (`tenantResolver`); query `tenantId` is not read.
+queryParams:
+  tenantId: "{{tenantId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      try {
+        const json = pm.response.json();
+        if (json && json.token) {
+          pm.collectionVariables.set('twilioToken', json.token);
+        }
+      } catch (e) {
+        console.warn('Could not parse token JSON', e);
+      }
+    language: text/javascript
+order: 1000

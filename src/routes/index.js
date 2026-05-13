@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import tokenRouter from './token.js';
+import zohoOAuthRouter from './zohoOAuth.js';
 import voiceRouter from './voice.js';
 import inboundRouter from './inbound.js';
 import eventsRouter from './events.js';
@@ -16,6 +17,7 @@ twilioWebhooks.use(voiceRouter);
 twilioWebhooks.use(inboundRouter);
 twilioWebhooks.use(eventsRouter);
 
+api.use('/', zohoOAuthRouter);
 api.use('/', tokenRouter);
 api.use('/', twilioWebhooks);
 api.use('/', voicemailRouter);

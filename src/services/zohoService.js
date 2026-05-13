@@ -42,7 +42,8 @@ export async function getAccessToken(tenantConfig) {
     refresh_token: tenantConfig.zohoRefreshToken,
   });
 
-  const { data } = await axios.post('https://accounts.zoho.com/oauth/v2/token', body.toString(), {
+  const tokenUrl = `${tenantConfig.zohoAccountsDomain}/oauth/v2/token`;
+  const { data } = await axios.post(tokenUrl, body.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     validateStatus: () => true,
   });

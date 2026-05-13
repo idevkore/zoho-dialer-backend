@@ -139,12 +139,11 @@
         },
         {
           "name": "Zoho OAuth Callback (browser flow)",
-          "disabled": true,
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER",
-            "description": "**Run in browser only — not triggered from Postman.**\n\nDocument-only placeholder for a future Zoho authorization-code redirect; this path is not registered in the current Express app."
+            "url": "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER&tenantId={{tenantId}}",
+            "description": "Exchanges Zoho's one-time `code` for a `refresh_token` (`src/routes/zohoOAuth.js`). Requires `ZOHO_*_CLIENT_ID`, `ZOHO_*_CLIENT_SECRET`, and `ZOHO_*_REDIRECT_URI` or `PUBLIC_BASE_URL`. Not a Twilio webhook."
           },
           "response": []
         }

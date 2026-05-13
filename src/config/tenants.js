@@ -99,6 +99,7 @@ export function getTenantIdByInboundNumber(toNumber) {
  *   zohoClientSecret: string;
  *   zohoRefreshToken: string;
  *   zohoOrgId: string;
+ *   zohoAccountsDomain: string;
  *   zohoApiDomain: string;
  * }}
  */
@@ -118,6 +119,9 @@ export function getTenantConfig(tenantId) {
   const zohoClientSecret = readNamespaced('ZOHO', slug, 'CLIENT_SECRET');
   const zohoRefreshToken = readNamespaced('ZOHO', slug, 'REFRESH_TOKEN');
   const zohoOrgId = readNamespaced('ZOHO', slug, 'ORG_ID');
+  const zohoAccountsDomain =
+    readNamespaced('ZOHO', slug, 'ACCOUNTS_DOMAIN')?.replace(/\/$/, '') ||
+    'https://accounts.zoho.com';
   const zohoApiDomain =
     readNamespaced('ZOHO', slug, 'API_DOMAIN')?.replace(/\/$/, '') ||
     'https://www.zohoapis.com';
@@ -154,7 +158,53 @@ export function getTenantConfig(tenantId) {
     zohoClientSecret,
     zohoRefreshToken,
     zohoOrgId,
+    zohoAccountsDomain,
     zohoApiDomain,
+  };
+}
+
+/**
+ * Zoho OAuth client fields only (no refresh token). Used to exchange an authorization `code`
+ * for tokens on `GET /api/v1/zoho/oauth/callback`.
+ *
+ * @param {string} tenantId
+ * @returns {{
+ *   tenantId: string;
+ *   zohoClientId: string;
+ *   zohoClientSecret: string;
+ *   redirectUri: string;
+ *   accountsDomain: string;
+ * }}
+ */
+export function getZohoOAuthClientConfig(tenantId) {
+  const slug = sanitizeTenantId(tenantId);
+  const zohoClientId = readNamespaced('ZOHO', slug, 'CLIENT_ID');
+  const zohoClientSecret = readNamespaced('ZOHO', slug, 'CLIENT_SECRET');
+  let redirectUri = readNamespaced('ZOHO', slug, 'REDIRECT_URI');
+  if (!redirectUri && config.publicBaseUrl) {
+    redirectUri = `${config.publicBaseUrl.replace(/\/$/, '')}/api/v1/zoho/oauth/callback`;
+  }
+  const accountsDomain =
+    readNamespaced('ZOHO', slug, 'ACCOUNTS_DOMAIN')?.replace(/\/$/, '') ||
+    'https://accounts.zoho.com';
+
+  const missing = [];
+  if (!zohoClientId) missing.push('ZOHO_*_CLIENT_ID');
+  if (!zohoClientSecret) missing.push('ZOHO_*_CLIENT_SECRET');
+  if (!redirectUri) missing.push('ZOHO_*_REDIRECT_URI or PUBLIC_BASE_URL');
+
+  if (missing.length) {
+    throw new Error(
+      `Zoho OAuth client is not configured for tenant "${slug}". Missing: ${missing.join(', ')}`,
+    );
+  }
+
+  return {
+    tenantId: slug,
+    zohoClientId,
+    zohoClientSecret,
+    redirectUri,
+    accountsDomain,
   };
 }
 

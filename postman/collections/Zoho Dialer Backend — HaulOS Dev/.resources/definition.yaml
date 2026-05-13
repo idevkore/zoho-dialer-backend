@@ -1,0 +1,21 @@
+$kind: collection
+description: Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth`. Token route resolves tenant via `X-Tenant-ID` (see Auth folder).
+variables:
+  baseUrl: https://haulos-zoho-dialer-backend.atiny.cloud
+  tenantId: kore
+  twilioSignature: PLACEHOLDER_REPLACE_WITH_REAL_TWILIO_SIGNATURE
+  twilioToken: ""
+  voicemailTwimlSig: PLACEHOLDER_SIG_FROM_VOICEMAIL_REDIRECT_OR_twimlToken
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      /*
+       * Twilio webhooks (Voice, Inbound, Events, Voicemail POST):
+       * In production, X-Twilio-Signature is validated against your Twilio Auth Token
+       * and PUBLIC_BASE_URL. Requests that do not originate from Twilio will be rejected.
+       *
+       * For Postman or local testing against a production NODE_ENV, you may need to
+       * bypass twilioWebhookAuth or run the server with NODE_ENV !== production so
+       * signature validation is skipped (see src/middleware/twilioWebhookAuth.js).
+       */
+    language: text/javascript

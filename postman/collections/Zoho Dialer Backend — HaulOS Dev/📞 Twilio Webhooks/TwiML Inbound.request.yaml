@@ -1,0 +1,15 @@
+$kind: http-request
+description: Inbound PSTN TwiML (`src/routes/inbound.js`). Tenant can be inferred from `To` if `TWILIO_*_INBOUND_NUMBER` is configured; otherwise add `tenantId` to body or query.
+url: "{{baseUrl}}/api/v1/inbound"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+  X-Twilio-Signature: "{{twilioSignature}}"
+body:
+  type: urlencoded
+  content:
+    To: "+17605026799"
+    From: "+18005559999"
+    CallSid: CAtest456
+    CallStatus: ringing
+order: 2000
