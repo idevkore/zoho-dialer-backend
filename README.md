@@ -64,12 +64,22 @@ $ACTIVATE_RELEASE()
 
 cd $FORGE_SITE_PATH
 
-pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.config.cjs --update-env --env production
+pm2 delete zoho-dialer-backend 2>/dev/null || true
+pm2 start ecosystem.config.cjs --update-env --env production
+pm2 save
 ```
+
+Always **`pm2 delete`** then **`pm2 start ecosystem.config.cjs`** here (not only `pm2 restart`). If the app was first started with a raw `node …/src/server.js` path, **`restart` keeps that stale config** and ignores `cwd`, `error_file`, and other ecosystem fields — which matches “502 + nothing on :3000”.
 
 Forge defines **`$FORGE_SITE_PATH`** as the **deployment root**, which is already the `current` symlink (e.g. `/home/forge/example.com/current`). Do **not** append `/current` again or `cd` will fail with `.../current/current`. Use **`$FORGE_SITE_ROOT`** for the parent directory (e.g. `/home/forge/example.com`) when you need the site home without `current`.
 
 Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH`** so `ecosystem.config.cjs` and shared files resolve against the activated release.
+
+### 502 and nothing on port 3000
+
+1. Confirm **Nginx** `proxy_pass` uses the same port as **`PORT`** in the site `.env` (Forge → Site → Environment). `grep ^PORT= $FORGE_SITE_ROOT/.env` then `ss -tlnp | grep that-port`.
+2. **`tail -n 100 $FORGE_SITE_PATH/storage/logs/pm2-error.log`** (and `pm2-out.log`) right after deploy.
+3. In Forge **Daemons**, ensure you are **not** also running a second Node command for the same app that conflicts with PM2.
 
 ### PM2 logs (where to look)
 

@@ -3,8 +3,8 @@ const path = require('node:path');
 
 /**
  * PM2 config for Laravel Forge (or any host running PM2).
- * Deploy: `pm2 restart zoho-dialer-backend --update-env` or first-time
- * `pm2 start ecosystem.config.cjs --update-env --env production`
+ * Deploy (Forge): from `$FORGE_SITE_PATH`, run `pm2 delete …` then
+ * `pm2 start ecosystem.config.cjs --update-env --env production` so this file is always applied.
  *
  * Fixed log paths under `storage/logs/` so you can always:
  *   tail -f storage/logs/pm2-error.log
@@ -23,7 +23,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
-      max_memory_restart: '300M',
       error_file: path.join(logDir, 'pm2-error.log'),
       out_file: path.join(logDir, 'pm2-out.log'),
       merge_logs: false,
