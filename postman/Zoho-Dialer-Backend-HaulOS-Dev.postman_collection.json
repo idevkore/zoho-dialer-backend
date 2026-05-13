@@ -1,0 +1,299 @@
+{
+  "info": {
+    "_postman_id": "a7c3e2b1-4d5f-6a7b-8c9d-0e1f2a3b4c5d",
+    "name": "Zoho Dialer Backend — HaulOS Dev",
+    "description": "Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth`. Token route resolves tenant via `X-Tenant-ID` (see Auth folder).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "/*",
+          " * Twilio webhooks (Voice, Inbound, Events, Voicemail POST):",
+          " * In production, X-Twilio-Signature is validated against your Twilio Auth Token",
+          " * and PUBLIC_BASE_URL. Requests that do not originate from Twilio will be rejected.",
+          " *",
+          " * For Postman or local testing against a production NODE_ENV, you may need to",
+          " * bypass twilioWebhookAuth or run the server with NODE_ENV !== production so",
+          " * signature validation is skipped (see src/middleware/twilioWebhookAuth.js).",
+          " */"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://haulos-zoho-dialer-backend.atiny.cloud"
+    },
+    {
+      "key": "tenantId",
+      "value": "kore"
+    },
+    {
+      "key": "twilioSignature",
+      "value": "PLACEHOLDER_REPLACE_WITH_REAL_TWILIO_SIGNATURE"
+    },
+    {
+      "key": "twilioToken",
+      "value": ""
+    },
+    {
+      "key": "voicemailTwimlSig",
+      "value": "PLACEHOLDER_SIG_FROM_VOICEMAIL_REDIRECT_OR_twimlToken"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Infrastructure",
+      "item": [
+        {
+          "name": "Health Check (root)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Root health probe (`src/server.js`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Health Check (/api/v1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/health",
+            "description": "Duplicate health under API prefix for Nginx `/api/*` routing (`src/routes/index.js`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Voicemail MP3 Asset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Content-Type indicates audio', function () {",
+                  "  const ct = pm.response.headers.get('Content-Type') || '';",
+                  "  pm.expect(ct.toLowerCase()).to.include('audio');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/voicemail-assets/default.mp3",
+            "description": "Static voicemail asset (often served by reverse proxy, not Express)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Get Twilio Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.token) {",
+                  "    pm.collectionVariables.set('twilioToken', json.token);",
+                  "  }",
+                  "} catch (e) {",
+                  "  console.warn('Could not parse token JSON', e);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenantId}}",
+                "type": "text",
+                "description": "Required by API (`tenantResolver`); query `tenantId` is not read."
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/token?tenantId={{tenantId}}",
+            "description": "Issues a Twilio Voice SDK JWT (`src/routes/token.js`). Saves `token` to collection variable `twilioToken` on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Zoho OAuth Callback (browser flow)",
+          "disabled": true,
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER",
+            "description": "**Run in browser only — not triggered from Postman.**\n\nDocument-only placeholder for a future Zoho authorization-code redirect; this path is not registered in the current Express app."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📞 Twilio Webhooks",
+      "item": [
+        {
+          "name": "TwiML Voice (outbound / client leg)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "type": "text"
+              },
+              {
+                "key": "X-Twilio-Signature",
+                "value": "{{twilioSignature}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "To", "value": "+18005551234", "type": "text" },
+                { "key": "From", "value": "+17605026799", "type": "text" },
+                { "key": "CallSid", "value": "CAtest123", "type": "text" },
+                { "key": "tenantId", "value": "{{tenantId}}", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/voice",
+            "description": "Outbound call TwiML (`src/routes/voice.js`). Simulates Twilio POSTing to your voice webhook."
+          },
+          "response": []
+        },
+        {
+          "name": "TwiML Inbound",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "type": "text"
+              },
+              {
+                "key": "X-Twilio-Signature",
+                "value": "{{twilioSignature}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "To", "value": "+17605026799", "type": "text" },
+                { "key": "From", "value": "+18005559999", "type": "text" },
+                { "key": "CallSid", "value": "CAtest456", "type": "text" },
+                { "key": "CallStatus", "value": "ringing", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/inbound",
+            "description": "Inbound PSTN TwiML (`src/routes/inbound.js`). Tenant can be inferred from `To` if `TWILIO_*_INBOUND_NUMBER` is configured; otherwise add `tenantId` to body or query."
+          },
+          "response": []
+        },
+        {
+          "name": "Events / Status Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "type": "text"
+              },
+              {
+                "key": "X-Twilio-Signature",
+                "value": "{{twilioSignature}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "CallSid", "value": "CAtest123", "type": "text" },
+                { "key": "CallStatus", "value": "completed", "type": "text" },
+                { "key": "CallDuration", "value": "47", "type": "text" },
+                {
+                  "key": "RecordingUrl",
+                  "value": "https://api.twilio.com/fake",
+                  "type": "text"
+                },
+                { "key": "tenantId", "value": "{{tenantId}}", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/events",
+            "description": "Recording + call status callbacks (`src/routes/events.js`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Voicemail Drop (redirect live call)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "type": "text"
+              },
+              {
+                "key": "X-Twilio-Signature",
+                "value": "{{twilioSignature}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "callSid", "value": "CAtest123", "type": "text" },
+                { "key": "tenantId", "value": "{{tenantId}}", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/voicemail",
+            "description": "JSON API to redirect a live call to voicemail TwiML (`src/routes/voicemail.js`). Body fields are **camelCase** `callSid` and `tenantId` (not Twilio-style `CallSid`)."
+          },
+          "response": []
+        },
+        {
+          "name": "TwiML Voicemail (GET — Twilio fetches after redirect)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Twilio-Signature",
+                "value": "{{twilioSignature}}",
+                "type": "text",
+                "description": "Ignored for GET unless you add auth; Twilio validates when it requests this URL."
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/twiml/voicemail?sig={{voicemailTwimlSig}}",
+            "description": "Returns `<Play>` TwiML for voicemail audio (`src/routes/voicemail.js`). Requires valid `sig` query param."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
