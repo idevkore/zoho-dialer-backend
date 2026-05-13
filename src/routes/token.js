@@ -39,6 +39,7 @@ function issueToken(req, res, next) {
     token.addGrant(grant);
 
     const jwt = token.toJwt();
+    console.info(`[haulos] token issued tenant=${tenant.tenantId} identity=${identity}`);
     return res.json({ token: jwt, identity, expiresIn: 3600 });
   } catch (err) {
     return next(err);

@@ -8,7 +8,10 @@ const router = Router();
  * @param {import('express').Request} _req
  * @param {import('express').Response} res
  */
-function postInbound(_req, res) {
+function postInbound(req, res) {
+  console.info(
+    `[haulos] inbound twiml tenant=${req.tenant?.tenantId} To=${req.body?.To ?? '(none)'}`,
+  );
   const vr = new twilio.twiml.VoiceResponse();
 
   /*

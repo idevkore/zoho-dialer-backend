@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { config } from './config/index.js';
 import api from './routes/index.js';
 
@@ -44,6 +45,9 @@ function isWidgetOriginAllowed(origin) {
 
 const app = express();
 
+/** Nginx / Forge in front — use X-Forwarded-* for req.ip and morgan :remote-addr. */
+app.set('trust proxy', 1);
+
 app.disable('x-powered-by');
 app.use(
   helmet({
@@ -77,6 +81,24 @@ app.use(
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+/** One line per request; skips health probes and noisy static widget assets. */
+function skipHttpRequestLog(req) {
+  if (req.method === 'OPTIONS') return true;
+  const p = req.path || '';
+  if ((p === '/health' || p === '/api/v1/health') && req.method === 'GET') return true;
+  if (p.startsWith('/app/') && req.method === 'GET') {
+    if (p === '/app/widget.html') return false;
+    if (/\.(css|js|svg|png|gif|ico|json|map|woff2?)$/i.test(p)) return true;
+  }
+  return false;
+}
+
+app.use(
+  morgan(':remote-addr :method :url :status :res[content-length] - :response-time ms', {
+    skip: (req) => skipHttpRequestLog(req),
+  }),
+);
 
 function sendHealth(_req, res) {
   res.json({ ok: true, service: 'zoho-dialer-backend' });

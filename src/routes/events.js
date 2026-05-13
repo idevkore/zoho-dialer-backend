@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { config } from '../config/index.js';
 import { logCompletedCallToZoho, rememberRecordingUrl } from '../services/callLogger.js';
 
 const router = Router();
@@ -12,8 +11,18 @@ const router = Router();
 async function postEvents(req, res) {
   const payload = /** @type {Record<string, string | undefined>} */ (req.body ?? {});
 
-  if (config.nodeEnv !== 'production') {
-    console.info('[twilio:event]', payload);
+  const verbose =
+    process.env.DEBUG_TWILIO_EVENTS === '1' ||
+    process.env.DEBUG_TWILIO_EVENTS === 'true' ||
+    process.env.DEBUG_TWILIO_EVENTS === 'yes';
+  if (verbose) {
+    console.info('[haulos] twilio:event:verbose', { tenantId: req.tenant?.tenantId, ...payload });
+  } else {
+    console.info(
+      `[haulos] twilio:event tenant=${req.tenant?.tenantId} CallSid=${payload.CallSid ?? '-'} ` +
+        `CallStatus=${payload.CallStatus ?? '-'} RecordingStatus=${payload.RecordingStatus ?? '-'} ` +
+        `Duration=${payload.CallDuration ?? '-'}`,
+    );
   }
 
   if (payload.RecordingUrl && payload.CallSid) {

@@ -12,6 +12,7 @@ const router = Router();
 function postVoice(req, res) {
   const tenant = req.tenant;
   const to = req.body?.To;
+  console.info(`[haulos] voice twiml tenant=${tenant?.tenantId} To=${typeof to === 'string' ? to : '(none)'}`);
 
   const vr = new twilio.twiml.VoiceResponse();
 
