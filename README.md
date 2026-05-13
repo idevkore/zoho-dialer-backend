@@ -27,23 +27,33 @@ This keeps **main** trustworthy as “what shipped,” while **dev** stays the d
 
 Copy `.env.example` to `.env` and fill values. `JWT_SECRET` is required (used to sign short-lived TwiML URLs for voicemail drop).
 
-**Zoho refresh token:** register a server-based OAuth client in [Zoho API Console](https://api-console.zoho.com/), set **`ZOHO_{TENANT}_REDIRECT_URI`** (or rely on **`PUBLIC_BASE_URL`** + default path), then open Zoho’s authorize URL with `access_type=offline` and `prompt=consent`. After Zoho redirects to this app with **`?code=...`**, add **`&tenantId=kore`** (your slug) to that same callback URL and open it once — **`GET /api/v1/zoho/oauth/callback`** exchanges the code and returns **`refresh_token`** JSON for Forge as **`ZOHO_{TENANT}_REFRESH_TOKEN`**.
+**Zoho refresh token:** register a server-based OAuth client in [Zoho API Console](https://api-console.zoho.com/). The **`redirect_uri`** you register must **exactly match** what you send on the authorize URL and what this app sends when exchanging the `code` (see **`ZOHO_{TENANT}_REDIRECT_URI`** or the default `{PUBLIC_BASE_URL}/api/v1/zoho/oauth/callback`).
+
+**Recommended:** register the callback **with the tenant in the query string**, e.g. `https://<your-domain>/api/v1/zoho/oauth/callback?tenantId=kore`, set the same value as **`ZOHO_kore_REDIRECT_URI`**, and use that **same** URL (URL-encoded) as **`redirect_uri`** on the authorize link. Zoho then redirects with **`tenantId` preserved** alongside **`code`**—no manual URL editing after sign-in.
+
+**Alternative:** register only `.../zoho/oauth/callback`; after Zoho redirects with `?code=...`, append **`&tenantId=kore`** once, then open that URL (or call **`GET /api/v1/zoho/oauth/callback`** from Postman) so the backend can exchange the code. Response JSON includes **`refresh_token`** → set **`ZOHO_{TENANT}_REFRESH_TOKEN`** in Forge.
 
 ### Zoho OAuth authorize URL (browser)
 
-Visit this pattern on **Zoho Accounts** (use your DC’s host, e.g. `accounts.zoho.eu` for EU). Replace `YOUR_CLIENT_ID`, `YOUR_SCOPE`, and the URL-encoded **`redirect_uri`** so it matches exactly what is registered in Zoho API Console (and what the backend uses, usually `{PUBLIC_BASE_URL}/api/v1/zoho/oauth/callback`).
+Visit this pattern on **Zoho Accounts** (use your DC’s host, e.g. `accounts.zoho.eu` for EU). Replace `YOUR_CLIENT_ID`, `YOUR_SCOPE`, and the URL-encoded **`redirect_uri`** so it **exactly matches** the callback URL registered in Zoho API Console (and **`ZOHO_{TENANT}_REDIRECT_URI`** / token exchange).
 
 ```
 https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=YOUR_CLIENT_ID&scope=YOUR_SCOPE&redirect_uri=URL_ENCODED_REDIRECT_URI
 ```
 
-**Verified example** (US `accounts.zoho.com`, HaulOS dialer backend on `haulos-zoho-dialer-backend.atiny.cloud`, scope `ZohoCRM.modules.ALL` — `client_id` must match your Zoho app):
+**Verified example** (callback **without** `tenantId` in `redirect_uri` — add `&tenantId=kore` after redirect if you did not register a longer redirect URL):
 
 ```
 https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=1000.341C3NUALS7F1G2VDFBN1THB98XD7C&scope=ZohoCRM.modules.ALL&redirect_uri=https%3A%2F%2Fhaulos-zoho-dialer-backend.atiny.cloud%2Fapi%2Fv1%2Fzoho%2Foauth%2Fcallback
 ```
 
-After sign-in, Zoho sends you to **`.../zoho/oauth/callback?code=...`** (and may add other Zoho params). **Append `&tenantId=kore`** (or `?tenantId=kore` if there is no existing query string) so the backend knows which tenant’s `ZOHO_*` client secrets to use, then load that full URL. See [Zoho Accounts OAuth — authorization request](https://www.zoho.com/crm/developer/docs/api/v2.1/auth-request.html) for parameters and regional hosts.
+**Same flow, `tenantId` baked into `redirect_uri`** (register this exact callback in Zoho; set **`ZOHO_kore_REDIRECT_URI`** to the decoded URL; use this encoded `redirect_uri` on authorize):
+
+```
+https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=1000.341C3NUALS7F1G2VDFBN1THB98XD7C&scope=ZohoCRM.modules.ALL&redirect_uri=https%3A%2F%2Fhaulos-zoho-dialer-backend.atiny.cloud%2Fapi%2Fv1%2Fzoho%2Foauth%2Fcallback%3FtenantId%3Dkore
+```
+
+See [Zoho Accounts OAuth — authorization request](https://www.zoho.com/crm/developer/docs/api/v2.1/auth-request.html) for parameters and regional hosts.
 
 ## Twilio console URLs
 
