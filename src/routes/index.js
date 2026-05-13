@@ -9,11 +9,6 @@ import { twilioWebhookAuth } from '../middleware/twilioWebhookAuth.js';
 
 const api = Router();
 
-api.get('/health', (_req, res) => {
-  // Duplicates root GET /health so probes work when Nginx only proxies /api/* to Node.
-  res.json({ ok: true, service: 'zoho-dialer-backend' });
-});
-
 const twilioWebhooks = Router();
 twilioWebhooks.use(twilioTenantContext, twilioWebhookAuth);
 

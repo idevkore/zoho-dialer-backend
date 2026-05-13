@@ -13,9 +13,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.get('/health', (_req, res) => {
+function sendHealth(_req, res) {
   res.json({ ok: true, service: 'zoho-dialer-backend' });
-});
+}
+
+/** Root probe (full Node URL). */
+app.get('/health', sendHealth);
+
+/**
+ * API-prefix probe: registered on the root `app` before `app.use('/api/v1', api)` so
+ * GET /api/v1/health never enters the API router (avoids falling through to Twilio
+ * webhook middleware on older or mis-ordered builds).
+ */
+app.get('/api/v1/health', sendHealth);
 
 app.use('/api/v1', api);
 

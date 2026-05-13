@@ -66,7 +66,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/v1/health",
-            "description": "Duplicate health under API prefix for Nginx `/api/*` routing (`src/routes/index.js`)."
+            "description": "API-prefix health (`src/server.js` — registered on the root app before `/api/v1` so this never hits Twilio webhook middleware). Do not add `tenantId` query params."
           },
           "response": []
         },
