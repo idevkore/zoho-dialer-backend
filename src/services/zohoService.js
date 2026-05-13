@@ -5,6 +5,9 @@ import { URLSearchParams } from 'node:url';
  * @typedef {import('../config/tenants.js').TenantConfig} TenantConfig
  */
 
+/** Zoho HTTP calls must finish or abort so Twilio webhooks can ACK quickly (Twilio ~15s limit). */
+const ZOHO_AXIOS_TIMEOUT_MS = 20_000;
+
 const tokenCache = new Map();
 
 /**
@@ -46,6 +49,7 @@ export async function getAccessToken(tenantConfig) {
   const { data } = await axios.post(tokenUrl, body.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     validateStatus: () => true,
+    timeout: ZOHO_AXIOS_TIMEOUT_MS,
   });
 
   if (data.error) {
@@ -103,6 +107,7 @@ export async function createCallActivity(contactId, callData, tenantConfig) {
       'Content-Type': 'application/json',
     },
     validateStatus: () => true,
+    timeout: ZOHO_AXIOS_TIMEOUT_MS,
   });
 
   if (data?.data?.[0]?.code === 'SUCCESS') {
@@ -151,10 +156,10 @@ function buildContactPhoneSearchCriteria(variants) {
  */
 export async function findContactIdByPhone(phone, tenantConfig) {
   if (!phone) return undefined;
-  const accessToken = await getAccessToken(tenantConfig);
   const digits = phone.replace(/\D/g, '');
   if (!digits) return undefined;
 
+  const accessToken = await getAccessToken(tenantConfig);
   const variants = phoneSearchDigitVariants(digits);
   const criteria = buildContactPhoneSearchCriteria(variants);
   const url = `${tenantConfig.zohoApiDomain}/crm/v8/Contacts/search`;
@@ -165,6 +170,7 @@ export async function findContactIdByPhone(phone, tenantConfig) {
       Authorization: `Zoho-oauthtoken ${accessToken}`,
     },
     validateStatus: () => true,
+    timeout: ZOHO_AXIOS_TIMEOUT_MS,
   });
 
   const id = data?.data?.[0]?.id;
