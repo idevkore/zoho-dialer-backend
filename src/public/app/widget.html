@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HaulOS — Dialer</title>
+    <link rel="stylesheet" href="./css/dialer.css" />
+    <!--
+      Zoho injects window.ZOHO when the widget runs inside CRM.
+      In zet local preview (https://127.0.0.1) ZOHO may be absent — app.js shows an error state.
+      Floating telephony widgets receive Dial / DialerActive events like page-embedded telephony;
+      some ZOHO.CRM.UI helpers differ from record-embedded widgets (see zoho-context.js).
+    -->
+    <script
+      src="https://unpkg.com/@twilio/voice-sdk@2.12.0/dist/twilio.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module">
+      import { init } from './js/app.js';
+      init();
+    </script>
+  </head>
+  <body>
+    <div id="dialer-root" class="dialer dialer--loading" data-state="loading" aria-live="polite">
+      <header class="dialer__header">
+        <div class="dialer__brand">
+          <img
+            class="dialer__wordmark"
+            src="./img/haulos-wordmark.svg"
+            height="36"
+            width="144"
+            alt="HaulOS"
+          />
+          <span class="dialer__title">Dialer</span>
+        </div>
+        <div class="dialer__header-actions" aria-label="Status and support">
+          <span id="status-dot" class="dialer__status-dot" title="Status"></span>
+          <button
+            type="button"
+            id="btn-support"
+            class="dialer__support-btn"
+            title="Report an issue or contact support"
+            aria-label="Report an issue or contact support"
+          >
+            <svg
+              class="dialer__support-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <p id="status-text" class="dialer__status-text">Starting…</p>
+
+      <div id="error-banner" class="dialer__error hidden" role="alert"></div>
+
+      <div id="callerid-display" class="dialer__callerid" aria-label="Caller ID">—</div>
+
+      <div id="timer-row" class="dialer__timer-row hidden">
+        <span class="dialer__timer-label">Call</span>
+        <span id="call-timer" class="dialer__timer">00:00</span>
+      </div>
+
+      <div id="panel-main" class="dialer__panel dialer__panel--main">
+        <div class="dialer__dial-row">
+          <input
+            type="tel"
+            id="dial-input"
+            class="dialer__input"
+            placeholder="Number or E.164"
+            autocomplete="tel"
+            aria-label="Phone number to dial"
+          />
+        </div>
+
+        <div class="dialer__dialpad" id="dialpad" aria-label="Dial pad">
+          <button type="button" class="dialer__key" data-digit="1">1</button>
+          <button type="button" class="dialer__key" data-digit="2">2</button>
+          <button type="button" class="dialer__key" data-digit="3">3</button>
+          <button type="button" class="dialer__key" data-digit="4">4</button>
+          <button type="button" class="dialer__key" data-digit="5">5</button>
+          <button type="button" class="dialer__key" data-digit="6">6</button>
+          <button type="button" class="dialer__key" data-digit="7">7</button>
+          <button type="button" class="dialer__key" data-digit="8">8</button>
+          <button type="button" class="dialer__key" data-digit="9">9</button>
+          <button type="button" class="dialer__key" data-digit="*">*</button>
+          <button type="button" class="dialer__key" data-digit="0">0</button>
+          <button type="button" class="dialer__key" data-digit="#">#</button>
+        </div>
+
+        <div class="dialer__actions">
+          <button type="button" id="btn-call" class="dialer__btn dialer__btn--primary">Call</button>
+          <button type="button" id="btn-mute" class="dialer__btn dialer__btn--toggle" disabled>
+            Mute
+          </button>
+          <button type="button" id="btn-vm-drop" class="dialer__btn" disabled>Voicemail drop</button>
+          <button type="button" id="btn-hangup" class="dialer__btn dialer__btn--danger" disabled>
+            Hang up
+          </button>
+        </div>
+      </div>
+
+      <div id="panel-inbound" class="dialer__panel dialer__panel--inbound hidden">
+        <p class="dialer__inbound-label">Incoming call</p>
+        <p id="inbound-caller" class="dialer__inbound-caller">—</p>
+        <div class="dialer__inbound-actions">
+          <button type="button" id="btn-accept" class="dialer__btn dialer__btn--primary">Accept</button>
+          <button type="button" id="btn-reject" class="dialer__btn dialer__btn--danger">Reject</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

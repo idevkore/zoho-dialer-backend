@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="158 18 368 102" role="img" aria-labelledby="haulosWordmarkTitle">
+  <title id="haulosWordmarkTitle">HaulOS</title>
+  <desc>HaulOS wordmark</desc>
+  <text
+    x="340"
+    y="110"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="92"
+    font-weight="700"
+    fill="#E8EAED"
+    text-anchor="middle"
+    letter-spacing="-1"
+  >
+    Haul<tspan fill="#F4622A">OS</tspan>
+  </text>
+</svg>
