@@ -69,7 +69,29 @@ pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.
 
 Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH/current`** so `ecosystem.config.cjs` and the shared `.env` symlink resolve against the active release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
 
-### Nginx: proxy to Node
+### PM2 logs (where to look)
+
+This repo pins PM2 output to **`storage/logs/`** next to the deployed code (see `ecosystem.config.cjs`):
+
+```bash
+cd ~/YOUR_SITE/current
+tail -n 200 storage/logs/pm2-error.log
+tail -n 200 storage/logs/pm2-out.log
+```
+
+After changing `error_file` / `out_file` in the ecosystem, recreate the process once so PM2 picks up paths:
+
+```bash
+cd ~/YOUR_SITE/current
+pm2 delete zoho-dialer-backend 2>/dev/null
+pm2 start ecosystem.config.cjs --update-env --env production && pm2 save
+```
+
+PM2’s default files (`~/.pm2/logs/<name>-error-0.log`) only apply if the process was **never** started with this ecosystem’s `error_file` — or use **`pm2 describe zoho-dialer-backend`** and copy the **exact** `error log path` / `out log path` lines. To stream both streams without guessing filenames:
+
+```bash
+pm2 logs zoho-dialer-backend --lines 200 --nostream
+```
 
 If the site Nginx config only has `try_files` under `location /`, **no traffic reaches Express**. Add a `location` that forwards **`/api/`** to the same **`PORT`** as in the site `.env` / Forge environment (replace `3000` below if different). Put this **above** the generic `location /` block so `/api/...` is handled first:
 
