@@ -11,10 +11,62 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const voicemailAssetsDir = path.join(__dirname, '..', 'voicemail-assets');
 const voicemailStatic = express.static(voicemailAssetsDir, { index: false, dotfiles: 'deny' });
 
+/** Exact origins or `https://*.suffix` patterns (suffix = registrable-style host, e.g. zoho.com). */
+const ALLOWED_WIDGET_ORIGINS = [
+  'https://crm.zoho.com',
+  'https://crm.zohocloud.ca',
+  'https://plugin-haulosdialerwidget.zohosandbox.com',
+  'https://*.zohosandbox.com',
+  'https://*.zoho.com',
+  'https://*.zohousercontent.com',
+  'https://127.0.0.1:5000',
+];
+
+function isWidgetOriginAllowed(origin) {
+  if (!origin) return true;
+  for (const entry of ALLOWED_WIDGET_ORIGINS) {
+    if (entry.startsWith('https://*.')) {
+      const suffix = entry.slice('https://*.'.length);
+      try {
+        const u = new URL(origin);
+        if (u.protocol !== 'https:') continue;
+        const h = u.hostname;
+        if (h === suffix || h.endsWith(`.${suffix}`)) return true;
+      } catch {
+        continue;
+      }
+    } else if (origin === entry) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const app = express();
 
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(
+  helmet({
+    frameguard: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        frameAncestors: [
+          "'self'",
+          'https://crm.zoho.com',
+          'https://crm.zohocloud.ca',
+          'https://plugin-haulosdialerwidget.zohosandbox.com',
+          'https://*.zoho.com',
+          'https://*.zohosandbox.com',
+          'https://*.zohousercontent.com',
+          'https://127.0.0.1:5000',
+        ],
+        scriptSrc: ["'self'", 'https://unpkg.com'],
+        connectSrc: ["'self'", 'https://*.twilio.com', 'wss://*.twilio.com'],
+      },
+    },
+  }),
+);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -40,7 +92,10 @@ app.use('/api/v1/voicemail-assets', voicemailStatic);
 /** Zoho CRM Telephony widget static assets (built to src/public/app/). */
 const zohoWidgetHtmlPath = path.join(__dirname, 'public', 'app', 'widget.html');
 app.use('/app', (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (!origin || isWidgetOriginAllowed(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') {
@@ -51,7 +106,6 @@ app.use('/app', (req, res, next) => {
 });
 app.get('/app/widget.html', (_req, res, next) => {
   res.type('html');
-  res.setHeader('X-Frame-Options', 'ALLOWALL');
   res.sendFile(zohoWidgetHtmlPath, { dotfiles: 'deny' }, (err) => {
     if (err) next(err);
   });
