@@ -41,7 +41,7 @@ Visit **Zoho Accounts** (e.g. `accounts.zoho.com`, or `accounts.zoho.eu` for EU)
 
 **Verified example** — tenant carried with literal **`&state=kore`** at the end (only `redirect_uri`’s value is percent-encoded as one query component):
 
-```
+```text
 https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=1000.341C3NUALS7F1G2VDFBN1THB98XD7C&scope=ZohoCRM.modules.ALL&redirect_uri=https%3A%2F%2Fhaulos-zoho-dialer-backend.atiny.cloud%2Fapi%2Fv1%2Fzoho%2Foauth%2Fcallback&state=kore
 ```
 
@@ -58,6 +58,8 @@ Mount paths are under **`/api/v1`** (Forge/Nginx should forward to this app):
 | Voice (TwiML App) | `https://<your-domain>/api/v1/voice?tenantId=<slug>` |
 | Status / recording callback | `https://<your-domain>/api/v1/events?tenantId=<slug>` |
 | Inbound (number webhook) | `https://<your-domain>/api/v1/inbound` (tenant resolved via `TWILIO_*_INBOUND_NUMBER` match on `To`, or add `?tenantId=`). |
+
+`tenantId` in these URLs is the **tenant slug** for namespaced env vars (`TWILIO_<slug>_*`, `ZOHO_<slug>_*`), not the value of `ZOHO_<slug>_ORG_ID`. CRM access is scoped by the Zoho refresh token; `ORG_ID` is required in config but is not sent on each CRM request.
 | Sample voicemail MP3 (bundled asset) | `https://<your-domain>/api/v1/voicemail-assets/default.mp3` (also `/voicemail-assets/default.mp3` if `/` is proxied to Node). |
 
 In **production**, set `PUBLIC_BASE_URL` to the same origin Twilio uses (required for `X-Twilio-Signature` validation). Set **`SKIP_TWILIO_SIG_VALIDATION`** to `true`, `1`, `yes`, or `on` (trimmed) to bypass checks while iterating on TwiML or when URLs do not line up; this is honored **even when `NODE_ENV=production`** (for example PM2 `env_production`), so **never leave it enabled on a public internet host** — the process logs a warning at startup if both are true. The Postman folder **📞 Twilio Webhooks** signs POST bodies when **`twilioAuthToken`** is your tenant’s Twilio Auth Token; if that variable is empty, the pre-request script **removes** `X-Twilio-Signature` so a stale JWT in `twilioSignature` cannot break requests when the server is skipping validation.

@@ -9,9 +9,12 @@ headers:
 body:
   type: urlencoded
   content:
-    CallSid: CAtest123
+    CallSid: CAtest123456789
     CallStatus: completed
     CallDuration: "47"
-    RecordingUrl: https://api.twilio.com/fake
+    RecordingUrl: https://api.twilio.com/fake/recording
     tenantId: "{{tenantId}}"
+    From: "{{fromNum}}"
+    To: "+17862669803"
+    Direction: outbound-api
 order: 3000

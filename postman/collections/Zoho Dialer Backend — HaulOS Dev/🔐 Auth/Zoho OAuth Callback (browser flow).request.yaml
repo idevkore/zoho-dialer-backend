@@ -1,6 +1,5 @@
 $kind: http-request
-description: |-
-  Exchanges Zoho's one-time `code` for a `refresh_token` (`src/routes/zohoOAuth.js`). Tenant slug: use `tenantId` and/or `state` (Zoho echoes `state` from the authorize URL — add `&state=kore` there). Requires `ZOHO_*_CLIENT_ID`, `ZOHO_*_CLIENT_SECRET`, and `ZOHO_*_REDIRECT_URI` or `PUBLIC_BASE_URL`. Not a Twilio webhook.
+description: "Exchanges Zoho `code` for `refresh_token`. Tenant: `tenantId` query or `state` from Zoho redirect (use `&state=kore` on authorize URL). Not a Twilio webhook."
 url: "{{baseUrl}}/api/v1/zoho/oauth/callback?code=PLACEHOLDER&state={{tenantId}}"
 method: GET
 queryParams:

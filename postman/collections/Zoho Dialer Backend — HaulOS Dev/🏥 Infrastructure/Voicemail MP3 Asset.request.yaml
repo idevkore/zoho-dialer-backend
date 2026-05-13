@@ -1,5 +1,5 @@
 $kind: http-request
-description: Bundled sample MP3 from `voicemail-assets/` (see `src/server.js`).
+description: Bundled sample MP3 (`voicemail-assets/default.mp3`). Served at `/voicemail-assets/*` and `/api/v1/voicemail-assets/*` (`src/server.js`) so it works behind Nginx that only proxies `/api/v1`.
 url: "{{baseUrl}}/api/v1/voicemail-assets/default.mp3"
 method: GET
 scripts:

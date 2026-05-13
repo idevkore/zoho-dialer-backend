@@ -107,6 +107,37 @@ export async function createCallActivity(contactId, callData, tenantConfig) {
 }
 
 /**
+ * Twilio sends E.164 NANP (+1…); Zoho often stores 10-digit national numbers.
+ * @param {string} digits
+ * @returns {string[]}
+ */
+export function phoneSearchDigitVariants(digits) {
+  const variants = [digits];
+  if (digits.length === 11 && digits.startsWith('1')) {
+    const national = digits.slice(1);
+    if (national.length === 10) variants.push(national);
+  }
+  return [...new Set(variants)];
+}
+
+/**
+ * @param {string[]} variants
+ * @returns {string}
+ */
+function buildContactPhoneSearchCriteria(variants) {
+  const clauses = [];
+  for (const v of variants) {
+    clauses.push(
+      `(Phone:equals:${v})`,
+      `(Mobile:equals:${v})`,
+      `(Phone:contains:${v})`,
+      `(Mobile:contains:${v})`,
+    );
+  }
+  return clauses.join('or');
+}
+
+/**
  * Search Contacts by phone-ish string (best-effort across common fields).
  * @param {string} phone
  * @param {TenantConfig} tenantConfig
@@ -118,10 +149,11 @@ export async function findContactIdByPhone(phone, tenantConfig) {
   const digits = phone.replace(/\D/g, '');
   if (!digits) return undefined;
 
-  const criteria = `(Phone:equals:${digits})or(Mobile:equals:${digits})or(Phone:contains:${digits})or(Mobile:contains:${digits})`;
+  const variants = phoneSearchDigitVariants(digits);
+  const criteria = buildContactPhoneSearchCriteria(variants);
   const url = `${tenantConfig.zohoApiDomain}/crm/v8/Contacts/search`;
 
-  const { data } = await axios.get(url, {
+  const { data, status } = await axios.get(url, {
     params: { criteria },
     headers: {
       Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -130,5 +162,11 @@ export async function findContactIdByPhone(phone, tenantConfig) {
   });
 
   const id = data?.data?.[0]?.id;
-  return typeof id === 'string' ? id : undefined;
+  if (typeof id === 'string') return id;
+
+  const snippet = JSON.stringify(data ?? {}).slice(0, 400);
+  console.warn(
+    `[zohoService] Contacts/search no id (tenant=${tenantConfig.tenantId} http=${status} variants=${variants.join(',')}) ${snippet}`,
+  );
+  return undefined;
 }

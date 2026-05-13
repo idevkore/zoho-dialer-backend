@@ -1,2 +1,42 @@
 $kind: collection
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      // Twilio X-Twilio-Signature: HMAC-SHA1(authToken, fullUrl + sorted key+value pairs, no delimiters).
+      // Only POST + application/x-www-form-urlencoded (matches twilio.validateRequest body).
+      if (pm.request.method !== 'POST') { return; }
+      const body = pm.request.body;
+      if (!body || body.mode !== 'urlencoded') { return; }
+
+      const rawToken = (pm.collectionVariables.get('twilioAuthToken') || '').trim();
+      const authToken = rawToken && !/^enter value$/i.test(rawToken) ? rawToken : '';
+      if (!authToken) {
+        try { pm.request.headers.remove('X-Twilio-Signature'); } catch (e) {}
+        console.warn('[Twilio pre-request] No `twilioAuthToken`: removed X-Twilio-Signature (use with server SKIP_TWILIO_SIG_VALIDATION or set a real Auth Token).');
+        return;
+      }
+
+      const requestUrl = pm.request.url.toString();
+      const bodyParams = {};
+      body.urlencoded.each(function (param) {
+        if (param.disabled) { return; }
+        const k = param.key;
+        if (!k) { return; }
+        bodyParams[k] = param.value == null ? '' : String(param.value);
+      });
+
+      const sortedKeys = Object.keys(bodyParams).sort();
+      let paramString = '';
+      sortedKeys.forEach(function (key) { paramString += key + bodyParams[key]; });
+
+      const dataToSign = requestUrl + paramString;
+      const signature = CryptoJS.HmacSHA1(dataToSign, authToken);
+      const base64Signature = CryptoJS.enc.Base64.stringify(signature);
+
+      pm.request.headers.upsert({ key: 'X-Twilio-Signature', value: base64Signature });
+
+      console.log('Twilio Signature:', base64Signature);
+      console.log('Full URL being signed:', requestUrl);
+      console.log('Param string appended:', paramString);
+    language: text/javascript
 order: 3000

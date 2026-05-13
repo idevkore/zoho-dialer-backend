@@ -1,5 +1,5 @@
 $kind: collection
-description: Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth`. Token route resolves tenant via `X-Tenant-ID` (see Auth folder).
+description: Express API for HaulOS Zoho Dialer. Twilio webhooks use `twilioTenantContext` + `twilioWebhookAuth`. Signatures are validated unless `SKIP_TWILIO_SIG_VALIDATION` is set (see README). Token route resolves tenant via `X-Tenant-ID` (see Auth folder).
 variables:
   baseUrl: https://haulos-zoho-dialer-backend.atiny.cloud
   tenantId: kore
@@ -10,6 +10,6 @@ variables:
 scripts:
   - type: http:beforeRequest
     code: |-
-      // Folder "📞 Twilio Webhooks" pre-request signs POST form bodies when `twilioAuthToken` is set.
-      // See README / src/middleware/twilioWebhookAuth.js (PUBLIC_BASE_URL must match signed URL).
+      // Folder "📞 Twilio Webhooks" runs a pre-request script that sets X-Twilio-Signature
+      // when `twilioAuthToken` is set (see README / src/middleware/twilioWebhookAuth.js).
     language: text/javascript

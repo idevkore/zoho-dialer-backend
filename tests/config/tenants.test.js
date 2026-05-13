@@ -1,4 +1,4 @@
-import { listTenantSlugs, sanitizeTenantId } from './tenants.js';
+import { listTenantSlugs, sanitizeTenantId } from '../../src/config/tenants.js';
 
 describe('tenants', () => {
   test('sanitizeTenantId rejects empty', () => {

@@ -1,7 +1,7 @@
 /** @type {import('jest').Config} */
 export default {
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.js'],
   transform: {},
   moduleFileExtensions: ['js'],
