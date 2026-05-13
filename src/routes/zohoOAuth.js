@@ -8,9 +8,9 @@ const router = Router();
  * Exchange Zoho OAuth authorization `code` for refresh token (server-based / browser consent flow).
  * Registered before Twilio webhook routes so this path is never subject to `X-Twilio-Signature`.
  *
- * Query: **`code`** (from Zoho redirect) and **`tenantId`** (slug, e.g. `kore`). Zoho does not add
- * `tenantId` for you — after the redirect, append **`&tenantId=kore`** to the callback URL (same
- * path Zoho opened) before loading it again or calling this endpoint from Postman.
+ * Query: **`code`** (from Zoho). Tenant slug: **`tenantId`** (if you add it to the callback URL) or
+ * **`state`** (recommended — Zoho echoes `state` from the authorize URL on redirect; arbitrary
+ * query params on `redirect_uri` alone are not always preserved).
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -18,13 +18,15 @@ const router = Router();
  */
 router.get('/zoho/oauth/callback', async (req, res, next) => {
   const code = typeof req.query.code === 'string' ? req.query.code.trim() : '';
-  const tenantId = typeof req.query.tenantId === 'string' ? req.query.tenantId.trim() : '';
+  const tenantFromQuery = typeof req.query.tenantId === 'string' ? req.query.tenantId.trim() : '';
+  const tenantFromState = typeof req.query.state === 'string' ? req.query.state.trim() : '';
+  const tenantId = tenantFromQuery || tenantFromState;
 
   if (!code || !tenantId) {
     return res.status(400).json({
       error: 'Missing query parameters',
       detail:
-        'Required: code (from Zoho redirect) and tenantId (e.g. kore). Append &tenantId=kore to the callback URL Zoho sent you to, then reload or copy the full URL.',
+        'Required: code (from Zoho). Tenant slug: use OAuth state (add &state=kore on the authorize URL — Zoho echoes it here) or append &tenantId=kore on the callback URL.',
     });
   }
 
