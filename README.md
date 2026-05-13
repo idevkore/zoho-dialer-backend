@@ -74,6 +74,14 @@ In **production**, set `PUBLIC_BASE_URL` to the same origin Twilio uses (require
 
 Create the site from `idevkore/zoho-dialer-backend`, configure the **deploy branch** (e.g. `dev`), set environment variables in Forge (including `PORT`, `NODE_ENV`, `PUBLIC_BASE_URL`, `JWT_SECRET`, and tenant-prefixed secrets), and point Nginx at the Node process listening on `PORT`.
 
+### Zoho telephony widget assets (`src/public/app/`)
+
+Express serves the CRM telephony widget from `src/public/app/` (see `/app/widget.html` in `src/server.js`). The **authoritative widget source** lives in the **separate Zoho widget repository** (not this repo).
+
+**Today (manual):** when you change widget code and need production (or this backend’s checkout) to serve the new build, run **`npm run deploy` in the widget repo** — that project’s deploy script syncs built files into the tree this service hosts. Afterward, do whatever that flow still requires (for example commit and push here, then Forge deploy this backend, if the script only copies into a local clone of `zoho-dialer-backend`).
+
+**Later (CI/CD):** this step should move into automation — e.g. extend the **Forge deploy script** to pull a widget artifact or run a sync, or add a **GitHub Action** in this repo (or the widget repo) so releases update `src/public/app/` without a manual `npm run deploy`. Until that exists, it is easy to ship backend changes and forget the widget pass; treat widget releases as part of the checklist.
+
 New Forge sites often use **zero-downtime deployments**. In that case the deploy script must use Forge’s release macros; a plain `git pull` in the site root will fail because there is no `.git` there. Example deploy script that works with this repo and **PM2** (`ecosystem.config.cjs` in the project root):
 
 ```bash
