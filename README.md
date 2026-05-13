@@ -62,12 +62,14 @@ npm ci --omit=dev
 
 $ACTIVATE_RELEASE()
 
-cd $FORGE_SITE_PATH/current
+cd $FORGE_SITE_PATH
 
 pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.config.cjs --update-env --env production
 ```
 
-Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH/current`** so `ecosystem.config.cjs` and the shared `.env` symlink resolve against the active release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
+Forge defines **`$FORGE_SITE_PATH`** as the **deployment root**, which is already the `current` symlink (e.g. `/home/forge/example.com/current`). Do **not** append `/current` again or `cd` will fail with `.../current/current`. Use **`$FORGE_SITE_ROOT`** for the parent directory (e.g. `/home/forge/example.com`) when you need the site home without `current`.
+
+Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH`** so `ecosystem.config.cjs` and shared files resolve against the activated release.
 
 ### PM2 logs (where to look)
 
@@ -92,6 +94,10 @@ PM2’s default files (`~/.pm2/logs/<name>-error-0.log`) only apply if the proce
 ```bash
 pm2 logs zoho-dialer-backend --lines 200 --nostream
 ```
+
+If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from the directory that contains your app code and `ecosystem.config.cjs`.
+
+### Nginx: proxy to Node
 
 If the site Nginx config only has `try_files` under `location /`, **no traffic reaches Express**. Add a `location` that forwards **`/api/`** to the same **`PORT`** as in the site `.env` / Forge environment (replace `3000` below if different). Put this **above** the generic `location /` block so `/api/...` is handled first:
 
