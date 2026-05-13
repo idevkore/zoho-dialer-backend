@@ -68,3 +68,34 @@ pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.
 ```
 
 Run **PM2 only after** `$ACTIVATE_RELEASE()` so the process serves the new `current` release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
+
+### Nginx: proxy to Node
+
+If the site Nginx config only has `try_files` under `location /`, **no traffic reaches Express**. Add a `location` that forwards **`/api/`** to the same **`PORT`** as in the site `.env` / Forge environment (replace `3000` below if different). Put this **above** the generic `location /` block so `/api/...` is handled first:
+
+```nginx
+location /api/ {
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 120s;
+    proxy_pass http://127.0.0.1:3000;
+}
+```
+
+Use `proxy_pass http://127.0.0.1:3000` **without** a URI path so the upstream receives the full path (e.g. `/api/v1/health`). If you also need **`GET /health`** at the site root, add a second block:
+
+```nginx
+location = /health {
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://127.0.0.1:3000;
+}
+```
+
+After editing, reload Nginx on the server (`sudo nginx -t && sudo service nginx reload`) or use Forge’s **Reload Nginx** if available.
