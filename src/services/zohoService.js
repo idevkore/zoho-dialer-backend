@@ -127,18 +127,14 @@ export function phoneSearchDigitVariants(digits) {
 function buildContactPhoneSearchCriteria(variants) {
   const clauses = [];
   for (const v of variants) {
-    clauses.push(
-      `(Phone:equals:${v})`,
-      `(Mobile:equals:${v})`,
-      `(Phone:contains:${v})`,
-      `(Mobile:contains:${v})`,
-    );
+    // Zoho rejects `contains` on Phone/Mobile (INVALID_QUERY invalid operator).
+    clauses.push(`(Phone:equals:${v})`, `(Mobile:equals:${v})`);
   }
   return clauses.join('or');
 }
 
 /**
- * Search Contacts by phone-ish string (best-effort across common fields).
+ * Search Contacts by phone-ish string (Phone / Mobile equality per digit variant).
  * @param {string} phone
  * @param {TenantConfig} tenantConfig
  * @returns {Promise<string | undefined>} Contact id if found
