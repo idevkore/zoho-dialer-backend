@@ -2,7 +2,7 @@
 
 Multi-tenant Node.js backend for the Zoho CRM web dialer: Twilio Voice (tokens, TwiML, webhooks) and Zoho CRM call logging.
 
-**GitHub:** `https://github.com/idevkore/zoho-dialer-backend`
+**GitHub:** `https://github.com/idevkore/zoho-dialer-backend` (default branch: **dev**)
 
 ## Branches
 
