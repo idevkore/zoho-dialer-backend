@@ -1,5 +1,20 @@
-import 'dotenv/config';
+import fs from 'node:fs';
+import path from 'node:path';
+import dotenv from 'dotenv';
 import { z } from 'zod';
+
+/**
+ * Laravel Forge: PM2 `cwd` is often `.../releases/<id>` while `.env` lives in the site root.
+ * Default `dotenv/config` only reads `cwd/.env`, so secrets were missing and the process exited.
+ */
+const cwd = process.cwd();
+for (const rel of ['.env', path.join('..', '.env'), path.join('..', '..', '.env')]) {
+  const abs = path.resolve(cwd, rel);
+  if (fs.existsSync(abs)) {
+    dotenv.config({ path: abs, quiet: true });
+    break;
+  }
+}
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
