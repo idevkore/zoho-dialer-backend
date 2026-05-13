@@ -1,9 +1,15 @@
 import './registerFatalHandlers.js';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/index.js';
 import api from './routes/index.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const voicemailAssetsDir = path.join(__dirname, '..', 'voicemail-assets');
+const voicemailStatic = express.static(voicemailAssetsDir, { index: false, dotfiles: 'deny' });
 
 const app = express();
 
@@ -26,6 +32,10 @@ app.get('/health', sendHealth);
  * webhook middleware on older or mis-ordered builds).
  */
 app.get('/api/v1/health', sendHealth);
+
+/** Sample voicemail MP3 (Postman + defaults). Also under /api/v1 so Nginx /api-only proxies reach Node. */
+app.use('/voicemail-assets', voicemailStatic);
+app.use('/api/v1/voicemail-assets', voicemailStatic);
 
 app.use('/api/v1', api);
 

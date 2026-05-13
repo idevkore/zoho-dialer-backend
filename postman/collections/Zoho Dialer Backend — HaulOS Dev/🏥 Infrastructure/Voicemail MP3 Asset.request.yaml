@@ -1,6 +1,6 @@
 $kind: http-request
-description: Static voicemail asset (often served by reverse proxy, not Express).
-url: "{{baseUrl}}/voicemail-assets/default.mp3"
+description: Bundled sample MP3 from `voicemail-assets/` (see `src/server.js`).
+url: "{{baseUrl}}/api/v1/voicemail-assets/default.mp3"
 method: GET
 scripts:
   - type: afterResponse

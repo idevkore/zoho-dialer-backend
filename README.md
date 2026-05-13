@@ -58,8 +58,9 @@ Mount paths are under **`/api/v1`** (Forge/Nginx should forward to this app):
 | Voice (TwiML App) | `https://<your-domain>/api/v1/voice?tenantId=<slug>` |
 | Status / recording callback | `https://<your-domain>/api/v1/events?tenantId=<slug>` |
 | Inbound (number webhook) | `https://<your-domain>/api/v1/inbound` (tenant resolved via `TWILIO_*_INBOUND_NUMBER` match on `To`, or add `?tenantId=`). |
+| Sample voicemail MP3 (bundled asset) | `https://<your-domain>/api/v1/voicemail-assets/default.mp3` (also `/voicemail-assets/default.mp3` if `/` is proxied to Node). |
 
-In **production**, set `PUBLIC_BASE_URL` to the same origin Twilio uses (required for `X-Twilio-Signature` validation).
+In **production**, set `PUBLIC_BASE_URL` to the same origin Twilio uses (required for `X-Twilio-Signature` validation). In **non-production**, validation runs by default as well; set `SKIP_TWILIO_SIG_VALIDATION=true` to bypass signature checks while iterating on TwiML, or when Twilio hits a tunnel URL that does not match `PUBLIC_BASE_URL`. The Postman collection folder **📞 Twilio Webhooks** includes a pre-request script that recomputes `X-Twilio-Signature` from the resolved request URL and sorted form fields when you set the secret collection variable `twilioAuthToken` (your tenant’s Twilio Auth Token).
 
 ## Scripts
 

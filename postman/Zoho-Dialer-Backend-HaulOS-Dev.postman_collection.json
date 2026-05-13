@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a7c3e2b1-4d5f-6a7b-8c9d-0e1f2a3b4c5d",
     "name": "Zoho Dialer Backend — HaulOS Dev",
-    "description": "Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth`. Token route resolves tenant via `X-Tenant-ID` (see Auth folder).",
+    "description": "Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth` (validates `X-Twilio-Signature` whenever `NODE_ENV=production`, and in non-production unless `SKIP_TWILIO_SIG_VALIDATION=true`). Token route resolves tenant via `X-Tenant-ID` (see Auth folder).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -11,15 +11,8 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "/*",
-          " * Twilio webhooks (Voice, Inbound, Events, Voicemail POST):",
-          " * In production, X-Twilio-Signature is validated against your Twilio Auth Token",
-          " * and PUBLIC_BASE_URL. Requests that do not originate from Twilio will be rejected.",
-          " *",
-          " * For Postman or local testing against a production NODE_ENV, you may need to",
-          " * bypass twilioWebhookAuth or run the server with NODE_ENV !== production so",
-          " * signature validation is skipped (see src/middleware/twilioWebhookAuth.js).",
-          " */"
+          "// Folder \"📞 Twilio Webhooks\" runs a pre-request script that sets X-Twilio-Signature",
+          "// when `twilioAuthToken` is set (see README / src/middleware/twilioWebhookAuth.js)."
         ]
       }
     }
@@ -32,6 +25,11 @@
     {
       "key": "tenantId",
       "value": "kore"
+    },
+    {
+      "key": "twilioAuthToken",
+      "value": "",
+      "type": "secret"
     },
     {
       "key": "twilioSignature",
@@ -92,8 +90,8 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/voicemail-assets/default.mp3",
-            "description": "Static voicemail asset (often served by reverse proxy, not Express)."
+            "url": "{{baseUrl}}/api/v1/voicemail-assets/default.mp3",
+            "description": "Bundled sample MP3 (`voicemail-assets/default.mp3`). Served at `/voicemail-assets/*` and `/api/v1/voicemail-assets/*` (`src/server.js`) so it works behind Nginx that only proxies `/api/v1`."
           },
           "response": []
         }
@@ -151,6 +149,50 @@
     },
     {
       "name": "📞 Twilio Webhooks",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Twilio X-Twilio-Signature: HMAC-SHA1(authToken, fullUrl + sorted key+value pairs, no delimiters).",
+              "// Only POST + application/x-www-form-urlencoded (matches twilio.validateRequest body).",
+              "if (pm.request.method !== 'POST') { return; }",
+              "const body = pm.request.body;",
+              "if (!body || body.mode !== 'urlencoded') { return; }",
+              "",
+              "const authToken = pm.collectionVariables.get('twilioAuthToken');",
+              "if (!authToken) {",
+              "  console.warn('[Twilio pre-request] Set secret collection variable `twilioAuthToken` to sign webhooks.');",
+              "  return;",
+              "}",
+              "",
+              "const requestUrl = pm.request.url.toString();",
+              "const bodyParams = {};",
+              "body.urlencoded.each(function (param) {",
+              "  if (param.disabled) { return; }",
+              "  const k = param.key;",
+              "  if (!k) { return; }",
+              "  bodyParams[k] = param.value == null ? '' : String(param.value);",
+              "});",
+              "",
+              "const sortedKeys = Object.keys(bodyParams).sort();",
+              "let paramString = '';",
+              "sortedKeys.forEach(function (key) { paramString += key + bodyParams[key]; });",
+              "",
+              "const dataToSign = requestUrl + paramString;",
+              "const signature = CryptoJS.HmacSHA1(dataToSign, authToken);",
+              "const base64Signature = CryptoJS.enc.Base64.stringify(signature);",
+              "",
+              "pm.request.headers.upsert({ key: 'X-Twilio-Signature', value: base64Signature });",
+              "",
+              "console.log('Twilio Signature:', base64Signature);",
+              "console.log('Full URL being signed:', requestUrl);",
+              "console.log('Param string appended:', paramString);"
+            ]
+          }
+        }
+      ],
       "item": [
         {
           "name": "TwiML Voice (outbound / client leg)",
