@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a7c3e2b1-4d5f-6a7b-8c9d-0e1f2a3b4c5d",
     "name": "Zoho Dialer Backend — HaulOS Dev",
-    "description": "Express API for HaulOS Zoho Dialer. Twilio webhook routes use `twilioTenantContext` + `twilioWebhookAuth` (validates `X-Twilio-Signature` whenever `NODE_ENV=production`, and in non-production unless `SKIP_TWILIO_SIG_VALIDATION=true`). Token route resolves tenant via `X-Tenant-ID` (see Auth folder).",
+    "description": "Express API for HaulOS Zoho Dialer. Twilio webhooks use `twilioTenantContext` + `twilioWebhookAuth`. Signatures are validated unless `SKIP_TWILIO_SIG_VALIDATION` is set (see README). Token route resolves tenant via `X-Tenant-ID` (see Auth folder).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -164,7 +164,8 @@
               "const rawToken = (pm.collectionVariables.get('twilioAuthToken') || '').trim();",
               "const authToken = rawToken && !/^enter value$/i.test(rawToken) ? rawToken : '';",
               "if (!authToken) {",
-              "  console.warn('[Twilio pre-request] Set secret `twilioAuthToken` to your Twilio Auth Token to sign; leave empty when the server skips validation (SKIP_TWILIO_SIG_VALIDATION).');",
+              "  try { pm.request.headers.remove('X-Twilio-Signature'); } catch (e) {}",
+              "  console.warn('[Twilio pre-request] No `twilioAuthToken`: removed X-Twilio-Signature (use with server SKIP_TWILIO_SIG_VALIDATION or set a real Auth Token).');",
               "  return;",
               "}",
               "",

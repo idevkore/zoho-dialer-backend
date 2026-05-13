@@ -3,18 +3,28 @@ import { config } from '../config/index.js';
 
 function skipTwilioSigValidationEnabled() {
   const v = String(process.env.SKIP_TWILIO_SIG_VALIDATION ?? '')
+    .replace(/^\uFEFF/, '')
     .trim()
     .toLowerCase();
-  return v === 'true' || v === '1' || v === 'yes';
+  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
 }
+
+const _skipSig = skipTwilioSigValidationEnabled();
+if (_skipSig && config.nodeEnv === 'production') {
+  console.warn(
+    '[twilioWebhookAuth] SKIP_TWILIO_SIG_VALIDATION is enabled while NODE_ENV=production. Webhook requests will not be signature-checked. Disable before exposing untrusted traffic.',
+  );
+}
+console.info(
+  `[twilioWebhookAuth] skipSignatureValidation=${_skipSig} (NODE_ENV=${config.nodeEnv}, SKIP_TWILIO_SIG_VALIDATION=${JSON.stringify(process.env.SKIP_TWILIO_SIG_VALIDATION ?? '')})`,
+);
 
 /**
  * Validate Twilio webhook `X-Twilio-Signature` (HMAC-SHA1 over full URL + sorted form params).
  *
- * - **Production:** always validates (ignores `SKIP_TWILIO_SIG_VALIDATION`).
- * - **Non-production:** validates by default so Postman + a matching `PUBLIC_BASE_URL` can
- *   exercise the same path as prod. Set `SKIP_TWILIO_SIG_VALIDATION=true` to bypass when
- *   you only care about TwiML/body behavior.
+ * Set `SKIP_TWILIO_SIG_VALIDATION` to `true`, `1`, `yes`, or `on` (trimmed) to bypass checks
+ * (Postman / TwiML-only testing). A **warning is logged at startup** if this is enabled while
+ * `NODE_ENV=production` — remove the flag on any host that faces untrusted clients.
  *
  * The signed URL must match `PUBLIC_BASE_URL` + `req.originalUrl` byte-for-byte (scheme,
  * host, path, query).
@@ -23,12 +33,9 @@ function skipTwilioSigValidationEnabled() {
  * @param {import('express').NextFunction} next
  */
 export function twilioWebhookAuth(req, res, next) {
-  const skipForDev = config.nodeEnv !== 'production' && skipTwilioSigValidationEnabled();
-
-  if (skipForDev) {
+  if (skipTwilioSigValidationEnabled()) {
     return next();
   }
-
   const authToken = req.tenant?.authToken;
   const signature = req.header('x-twilio-signature');
   const baseUrl = config.publicBaseUrl?.replace(/\/$/, '');
