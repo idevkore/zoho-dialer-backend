@@ -110,7 +110,7 @@ app.get('/app/widget.html', (_req, res, next) => {
     if (err) next(err);
   });
 });
-app.use('/app', express.static(path.join(__dirname, 'public')));
+app.use('/app', express.static(path.join(__dirname, 'public', 'app')));
 
 app.use('/api/v1', api);
 
