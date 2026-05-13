@@ -27,23 +27,23 @@ This keeps **main** trustworthy as “what shipped,” while **dev** stays the d
 
 Copy `.env.example` to `.env` and fill values. `JWT_SECRET` is required (used to sign short-lived TwiML URLs for voicemail drop).
 
-**Zoho refresh token:** register a server-based OAuth client in [Zoho API Console](https://api-console.zoho.com/), set **`ZOHO_{TENANT}_REDIRECT_URI`** (or rely on **`PUBLIC_BASE_URL`** + default path), then open Zoho’s authorize URL with `access_type=offline` and `prompt=consent`. Add **`&state=<tenant_slug>`** (e.g. `&state=kore`) so Zoho redirects with `?code=...&state=kore` — the callback accepts **`tenantId`** or **`state`** as the tenant slug. **`GET /api/v1/zoho/oauth/callback`** then exchanges the code and returns **`refresh_token`** JSON for you to paste into Forge as **`ZOHO_{TENANT}_REFRESH_TOKEN`**.
+**Zoho refresh token:** register a server-based OAuth client in [Zoho API Console](https://api-console.zoho.com/), set **`ZOHO_{TENANT}_REDIRECT_URI`** (or rely on **`PUBLIC_BASE_URL`** + default path), then open Zoho’s authorize URL with `access_type=offline` and `prompt=consent`. After Zoho redirects to this app with **`?code=...`**, add **`&tenantId=kore`** (your slug) to that same callback URL and open it once — **`GET /api/v1/zoho/oauth/callback`** exchanges the code and returns **`refresh_token`** JSON for Forge as **`ZOHO_{TENANT}_REFRESH_TOKEN`**.
 
 ### Zoho OAuth authorize URL (browser)
 
-Visit this pattern on **Zoho Accounts** (use your DC’s host, e.g. `accounts.zoho.eu` for EU). Replace `YOUR_CLIENT_ID`, `YOUR_SCOPE`, `YOUR_TENANT_SLUG`, and the URL-encoded **`redirect_uri`** so it matches exactly what is registered in Zoho API Console (and what the backend uses, usually `{PUBLIC_BASE_URL}/api/v1/zoho/oauth/callback`).
+Visit this pattern on **Zoho Accounts** (use your DC’s host, e.g. `accounts.zoho.eu` for EU). Replace `YOUR_CLIENT_ID`, `YOUR_SCOPE`, and the URL-encoded **`redirect_uri`** so it matches exactly what is registered in Zoho API Console (and what the backend uses, usually `{PUBLIC_BASE_URL}/api/v1/zoho/oauth/callback`).
 
 ```
-https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=YOUR_CLIENT_ID&scope=YOUR_SCOPE&redirect_uri=URL_ENCODED_REDIRECT_URI&state=YOUR_TENANT_SLUG
+https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=YOUR_CLIENT_ID&scope=YOUR_SCOPE&redirect_uri=URL_ENCODED_REDIRECT_URI
 ```
 
-**Verified example** (US `accounts.zoho.com`, HaulOS dialer backend on `haulos-zoho-dialer-backend.atiny.cloud`, scope `ZohoCRM.modules.ALL`, `state=kore` — `client_id` must match your Zoho app):
+**Verified example** (US `accounts.zoho.com`, HaulOS dialer backend on `haulos-zoho-dialer-backend.atiny.cloud`, scope `ZohoCRM.modules.ALL` — `client_id` must match your Zoho app):
 
 ```
-https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=1000.341C3NUALS7F1G2VDFBN1THB98XD7C&scope=ZohoCRM.modules.ALL&redirect_uri=https%3A%2F%2Fhaulos-zoho-dialer-backend.atiny.cloud%2Fapi%2Fv1%2Fzoho%2Foauth%2Fcallback&state=kore
+https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline&prompt=consent&client_id=1000.341C3NUALS7F1G2VDFBN1THB98XD7C&scope=ZohoCRM.modules.ALL&redirect_uri=https%3A%2F%2Fhaulos-zoho-dialer-backend.atiny.cloud%2Fapi%2Fv1%2Fzoho%2Foauth%2Fcallback
 ```
 
-After approval, Zoho sends you to the callback with `code` and `state`; no need to hand-append `tenantId` unless you prefer it. You can still add **`&tenantId=kore`** if both are present, `tenantId` wins. See [Zoho Accounts OAuth — authorization request](https://www.zoho.com/crm/developer/docs/api/v2.1/auth-request.html) for parameters and regional hosts.
+After sign-in, Zoho sends you to **`.../zoho/oauth/callback?code=...`** (and may add other Zoho params). **Append `&tenantId=kore`** (or `?tenantId=kore` if there is no existing query string) so the backend knows which tenant’s `ZOHO_*` client secrets to use, then load that full URL. See [Zoho Accounts OAuth — authorization request](https://www.zoho.com/crm/developer/docs/api/v2.1/auth-request.html) for parameters and regional hosts.
 
 ## Twilio console URLs
 
