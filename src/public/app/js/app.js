@@ -12,11 +12,27 @@ import { initSupportButton } from './support-feedback.js';
 /** @type {boolean} */
 let dialerReady = false;
 
+/** CRM click-to-dial received before Twilio/bootstrap finished (last number wins). */
+let pendingCrmDial = null;
+
 /** @type {Promise<unknown> | null} */
 let embeddedInitPromise = null;
 
 /** @type {Promise<void>} */
 let bootChain = Promise.resolve();
+
+/**
+ * @param {string} num
+ */
+function queueOrDialFromCrm(num) {
+  const s = String(num || '').trim();
+  if (!s) return;
+  if (dialerReady) {
+    void CallControls.dialOutboundFromExternal(s);
+  } else {
+    pendingCrmDial = s;
+  }
+}
 
 /**
  * Ensure ZOHO.embeddedApp.init() has completed (required before CONFIG.getVariable).
@@ -101,14 +117,16 @@ async function bootstrapDialer(_pageData) {
   CallControls.setupInboundUi(tenantId);
   CallControls.bindControls(tenantId);
 
-  ZohoCtx.watchForPhoneClicks((num) => {
-    ZohoCtx.triggerClickToDial(num);
-  });
-
   await prefillFromCurrentRecord();
 
   dialerReady = true;
   CallControls.setState('ready');
+
+  if (pendingCrmDial) {
+    const queued = pendingCrmDial;
+    pendingCrmDial = null;
+    await CallControls.dialOutboundFromExternal(queued);
+  }
 }
 
 /**
@@ -152,6 +170,8 @@ export async function init() {
     window.__HAULOS_LAST_PAGELOAD__ = data;
     enqueueBootstrap(data);
   });
+
+  ZohoCtx.watchForPhoneClicks((num) => queueOrDialFromCrm(num));
 
   await ensureEmbeddedInit();
 

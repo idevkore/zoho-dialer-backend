@@ -132,7 +132,53 @@ export function triggerClickToDial(phoneNumber) {
 }
 
 /**
+ * Normalize Zoho CRM `Dial` event payload to a single dialable string.
+ * @param {unknown} data
+ * @returns {string}
+ */
+export function extractDialNumberFromCrmEvent(data) {
+  if (data == null) return '';
+  if (typeof data === 'string') return data.trim();
+  if (typeof data !== 'object') return '';
+
+  const tryRecord = (o) => {
+    if (!o || typeof o !== 'object') return '';
+    const d = /** @type {Record<string, unknown>} */ (o);
+    const keys = [
+      'Number',
+      'Phone',
+      'phone',
+      'number',
+      'PhoneNumber',
+      'phoneNumber',
+      'E164',
+      'e164',
+      'To',
+      'to',
+      'Mobile',
+      'mobile',
+      'Tel',
+      'tel',
+    ];
+    for (const k of keys) {
+      const v = d[k];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+      if (typeof v === 'number' && Number.isFinite(v)) return String(v);
+    }
+    return '';
+  };
+
+  const direct = tryRecord(data);
+  if (direct) return direct;
+
+  const nested = /** @type {Record<string, unknown>} */ (data);
+  const inner = nested.data ?? nested.Data ?? nested.payload;
+  return tryRecord(inner);
+}
+
+/**
  * Subscribe to CRM-initiated dial actions (phone icon / click-to-dial).
+ * Register before `ZOHO.embeddedApp.init()` so early clicks are not dropped.
  * @param {(phone: string, meta?: unknown) => void} onDial
  */
 export function watchForPhoneClicks(onDial) {
@@ -145,9 +191,12 @@ export function watchForPhoneClicks(onDial) {
   }
 
   Z.embeddedApp.on('Dial', (data) => {
-    const num =
-      (data && (data.Number || data.Phone || data.phone || data.number)) || '';
-    if (num) onDial(String(num), data);
+    const num = extractDialNumberFromCrmEvent(data);
+    if (num) {
+      onDial(num, data);
+      return;
+    }
+    console.warn('[zoho-context] Dial event had no recognizable number', data);
   });
 }
 

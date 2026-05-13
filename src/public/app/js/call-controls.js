@@ -210,30 +210,7 @@ export function bindControls(tid) {
   });
 
   $('btn-call').addEventListener('click', async () => {
-    const raw = dialInput.value.trim();
-    if (!raw || state !== 'ready') return;
-    setState('calling');
-    callerId.textContent = raw;
-    logContext = {
-      direction: 'outbound',
-      toNumber: raw,
-      fromNumber: '',
-      callSid: '',
-    };
-    try {
-      const call = await TwilioLayer.makeCall(raw, '', tenantId);
-      try {
-        logContext.callSid = call.parameters.CallSid || '';
-      } catch {
-        /* ignore */
-      }
-      attachCallSideEffects(call);
-    } catch (e) {
-      console.error(e);
-      logContext = null;
-      setState('error', { message: e instanceof Error ? e.message : String(e) });
-      window.setTimeout(() => setState('ready'), 6000);
-    }
+    await dialOutboundFromExternal(dialInput.value.trim());
   });
 
   $('btn-hangup').addEventListener('click', () => {
@@ -336,4 +313,44 @@ export function setupInboundUi(tid) {
 
 export function getState() {
   return state;
+}
+
+/**
+ * Start outbound call (CRM click-to-dial or programmatic). Same behavior as the Call button.
+ * @param {string} raw
+ * @returns {Promise<boolean>} true if a dial was started
+ */
+export async function dialOutboundFromExternal(raw) {
+  const num = String(raw || '').trim();
+  if (!num || state !== 'ready') return false;
+
+  const dialInput = /** @type {HTMLInputElement} */ ($('dial-input'));
+  const callerId = $('callerid-display');
+  dialInput.value = num;
+  callerId.textContent = num;
+  window.dispatchEvent(new CustomEvent('haulosDialNumber', { detail: { phoneNumber: num } }));
+
+  setState('calling');
+  logContext = {
+    direction: 'outbound',
+    toNumber: num,
+    fromNumber: '',
+    callSid: '',
+  };
+  try {
+    const call = await TwilioLayer.makeCall(num, '', tenantId);
+    try {
+      logContext.callSid = call.parameters.CallSid || '';
+    } catch {
+      /* ignore */
+    }
+    attachCallSideEffects(call);
+  } catch (e) {
+    console.error(e);
+    logContext = null;
+    setState('error', { message: e instanceof Error ? e.message : String(e) });
+    window.setTimeout(() => setState('ready'), 6000);
+    return false;
+  }
+  return true;
 }
