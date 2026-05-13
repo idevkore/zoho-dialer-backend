@@ -2,14 +2,22 @@
 
 Multi-tenant Node.js backend for the Zoho CRM web dialer: Twilio Voice (tokens, TwiML, webhooks) and Zoho CRM call logging.
 
-**GitHub:** `https://github.com/idevkore/zoho-dialer-backend` (default branch: **dev**)
+**GitHub:** `https://github.com/idevkore/zoho-dialer-backend` (default branch: **dev** — target for feature PRs)
 
 ## Branches
 
-- **main** — matches what is successfully deployed to production.
-- **dev** — default integration branch. Merge here and branch from here for feature work.
+- **dev** — integration branch. Feature PRs merge here first; this is what you deploy to production for verification.
+- **main** — after production testing passes, **main** is updated so it matches the functional production deployment (same commits that are live).
 
-Flow: feature branches → **dev** → when release-ready, merge **dev** → **main**.
+### Workflow
+
+1. Open feature branches from **dev**, implement and test locally, then open PRs **into `dev`**.
+2. Merge approved PRs to **dev** and deploy **dev** to production (Forge) for final verification.
+3. Once production looks good, merge **`dev` → `main`**. **main** is then the canonical copy of what is running in production.
+4. Merge **`main` → `dev`** so **dev** picks up that merge commit and stays aligned with production history.
+5. Branch new features from **dev** again and repeat.
+
+This keeps **main** trustworthy as “what shipped,” while **dev** stays the day-to-day integration line you branch from and PR into.
 
 ## Requirements
 
