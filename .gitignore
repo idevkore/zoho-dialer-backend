@@ -6,6 +6,6 @@ coverage/
 .npm/
 .postman/
 
-# Zoho widget build output (directory kept via .gitkeep)
-src/public/app/*
-!src/public/app/.gitkeep
+# # Zoho widget build output (directory kept via .gitkeep)
+# src/public/app/*
+# !src/public/app/.gitkeep
