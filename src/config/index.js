@@ -8,10 +8,12 @@ import { z } from 'zod';
  * Default `dotenv/config` only reads `cwd/.env`, so secrets were missing and the process exited.
  */
 const cwd = process.cwd();
+let dotenvPathUsed = '';
 for (const rel of ['.env', path.join('..', '.env'), path.join('..', '..', '.env')]) {
   const abs = path.resolve(cwd, rel);
   if (fs.existsSync(abs)) {
     dotenv.config({ path: abs, quiet: true });
+    dotenvPathUsed = abs;
     break;
   }
 }
@@ -38,6 +40,10 @@ if (!parsed.success) {
 }
 
 const { PORT, NODE_ENV, JWT_SECRET, PUBLIC_BASE_URL, TENANT_SLUGS } = parsed.data;
+
+console.info(
+  `[zoho-dialer-backend] cwd=${cwd} dotenv=${dotenvPathUsed || '(none; using process.env only)'}`,
+);
 
 /**
  * Application configuration loaded from environment variables (validated with Zod).

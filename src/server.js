@@ -37,6 +37,10 @@ app.use((err, _req, res, _next) => {
 
 /** Bind IPv4 so Nginx `proxy_pass http://127.0.0.1:PORT` can connect (avoid ::-only listen). */
 const listenHost = '0.0.0.0';
-app.listen(config.port, listenHost, () => {
+const server = app.listen(config.port, listenHost, () => {
   console.log(`Listening on http://${listenHost}:${config.port} (${config.nodeEnv})`);
+});
+server.on('error', (err) => {
+  console.error(`Failed to listen on ${listenHost}:${config.port}`, err);
+  process.exitCode = 1;
 });

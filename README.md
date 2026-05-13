@@ -62,12 +62,12 @@ npm ci --omit=dev
 
 $ACTIVATE_RELEASE()
 
-cd $FORGE_SITE_PATH
+cd $FORGE_SITE_PATH/current
 
 pm2 restart zoho-dialer-backend --update-env 2>/dev/null || pm2 start ecosystem.config.cjs --update-env --env production
 ```
 
-Run **PM2 only after** `$ACTIVATE_RELEASE()` so the process serves the new `current` release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
+Run **PM2 only after** `$ACTIVATE_RELEASE()` from **`$FORGE_SITE_PATH/current`** so `ecosystem.config.cjs` and the shared `.env` symlink resolve against the active release. If you use **standard** (non–zero-downtime) deployments instead, use `git pull` / `git reset --hard` from `$FORGE_SITE_ROOT` and the same `npm ci` + PM2 lines from that directory.
 
 ### Nginx: proxy to Node
 
