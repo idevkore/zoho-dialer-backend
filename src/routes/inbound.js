@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * Inbound PSTN TwiML: bridge to browser client identity `agent`.
- * @param {import('express').Request} req
+ * @param {import('express').Request} _req
  * @param {import('express').Response} res
  */
 function postInbound(_req, res) {
