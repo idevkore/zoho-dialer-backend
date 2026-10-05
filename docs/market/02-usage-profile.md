@@ -52,7 +52,7 @@ Mean and median are the same number here because there is one assumed profile, n
 Two things in this table matter for pricing:
 
 - The browser leg runs longer than the phone leg. It is billed on unanswered attempts too, if the audit's reading is right. That makes it about a fifth of voice cost.
-- At 60 attempts a day a seat uses about 2,020 customer minutes, well above the 1,200 in the starting hypothesis. The 1,200 allowance only holds margin if overage is charged, or if real usage is closer to 35 attempts a day.
+- At 60 attempts a day a seat uses about 2,020 customer minutes, well above the 1,200 in the starting hypothesis. The 1,200 allowance only holds margin if overage is charged, or if real usage is closer to 26 attempts a day.
 
 ## Texting, per tenant per month
 
