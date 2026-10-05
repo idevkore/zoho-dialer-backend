@@ -1,0 +1,619 @@
+{
+  "pulled_at": "2026-10-05T02:27:33Z",
+  "window": {
+    "from": "2026-07-01",
+    "to": "2026-10-04"
+  },
+  "tenants": [
+    {
+      "tenant": "kore",
+      "environment": "dev",
+      "months": [
+        {
+          "month": "2026-07",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-08",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-09",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-10",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        }
+      ]
+    },
+    {
+      "tenant": "kore-sandbox",
+      "environment": "sandbox",
+      "months": [
+        {
+          "month": "2026-07",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-08",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-09",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-10",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        }
+      ]
+    },
+    {
+      "tenant": "the-moving-group",
+      "environment": "prod",
+      "months": [
+        {
+          "month": "2026-07",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-08",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-09",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        },
+        {
+          "month": "2026-10",
+          "voice": {
+            "calls_out": null,
+            "calls_in": null,
+            "connected_calls": null,
+            "avg_duration_sec": null,
+            "median_duration_sec": null,
+            "billed_min_total": null,
+            "billed_min_pstn_out": null,
+            "billed_min_pstn_in": null,
+            "billed_min_browser_leg": null,
+            "recorded_min": null,
+            "voicemail_drops": null,
+            "amd_calls": null,
+            "active_agents": null,
+            "peak_concurrent": null
+          },
+          "sms": {
+            "msgs_out": null,
+            "msgs_in": null,
+            "segments_out": null,
+            "segments_in": null,
+            "delivery_rate": null,
+            "opt_outs": null,
+            "filtered_errors": null,
+            "carrier_fee_usd": null
+          },
+          "sendblue": {
+            "lines": null,
+            "inbound_contacts_per_day_avg": null,
+            "inbound_contacts_per_day_max": null,
+            "msgs_in": null,
+            "msgs_out": null,
+            "plan": null
+          },
+          "zoho_crm": {
+            "licensed_users": null,
+            "edition": null,
+            "api_credits_per_day_avg": null,
+            "api_credits_per_day_peak": null,
+            "api_credit_limit": null,
+            "call_records_created": null
+          },
+          "zoho_marketing": {
+            "sends": null
+          }
+        }
+      ]
+    }
+  ],
+  "billed_costs_by_category": [],
+  "notes": [
+    "NO USAGE WAS RETRIEVED IN THIS PULL. Every metric is null. Nothing here is estimated. See pull-log.md for what was tried.",
+    "2026-10 is month-to-date (2026-10-01 to 2026-10-04).",
+    "Twilio (HaulOS account): UNAVAILABLE. No tool in the session is signed in to it. The two saved Twilio CLI profiles were identified by their TwiML application list only; neither has an application pointing at the HaulOS dialer backend, so neither was queried further. The desktop Twilio connector is bound to another project's account and has no usage endpoints. billed_costs_by_category is empty for the same reason.",
+    "The Moving Group production (Zoho CRM, Zoho Voice, the client's own Twilio account, the client website database): reachable through the client website repo's own read-only scripts, but the read was stopped by the session's permission check on production reads before any request was sent. NOT PULLED. Re-run with that read allowed to fill the the-moving-group block.",
+    "Zoho CRM (Kore org and sandbox): UNAVAILABLE. The HaulOS Zoho configuration tool holds settings-scope tokens (fields, layouts, pipeline, roles, profiles, views, workflows) and has no read path for org, users or records.",
+    "SendBlue: UNAVAILABLE. No connector, CLI or code in any HaulOS repository.",
+    "Zoho Marketing Automation: UNAVAILABLE. Not in use; no tool.",
+    "10DLC brand and campaign status and fees for the HaulOS account: not retrievable (Twilio unavailable).",
+    "PRIOR OBSERVATION, not from this pull (2026-09-30 probe of The Moving Group's Zoho Voice): 2 Zoho Voice users, 3 lines (2 that text, 1 calls only). Request-board card 63 (2026-09-03) records the plan as the Solo tier.",
+    "PRIOR OBSERVATION, not from this pull (2026-10-01 capacity study of the client website): Zoho CRM API allowance 53,000 credits a day for The Moving Group's org; Zoho Voice documents 20 requests a minute; the client's own Twilio account held 7 numbers.",
+    "PRIOR OBSERVATION, not from this pull (2026-10-01 capacity study): the Netlify team that hosts the client website is on the credit-based Pro plan ($20 for 3,000 credits) and was using about 9,000 credits a month (about $60), about 80% of it database compute kept awake by every-minute schedules; five sites share the credit pool.",
+    "PRIOR OBSERVATION, not from this pull (request-board card 48): SendBlue was canceled for The Moving Group on 2026-08-27 because the recipient has to message first; no material spend.",
+    "Dev and ramp-up warning: the first client is still deploying. When this file is filled, treat kore/dev and kore-sandbox as test traffic and 2026-07 to 2026-09 as ramp-up for the-moving-group."
+  ]
+}
