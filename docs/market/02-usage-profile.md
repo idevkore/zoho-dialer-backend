@@ -2,7 +2,7 @@
 
 Written 2026-10-04.
 
-**There are no actuals.** The Step 0 pull returned nothing (see `inputs/pull-log.md`), so n = 0 months and 0 seats for every metric. Every per-seat and per-tenant figure below is an ASSUMPTION built from stated drivers. None of it is measured. Low and high are plus or minus 50% of base, the rule for fewer than three months of data.
+**There are no actuals in the repo.** `inputs/usage-actuals.json` is all nulls (see `inputs/pull-log.md`), so n = 0 months and 0 seats for every metric. Every per-seat and per-tenant figure below is an ASSUMPTION built from stated drivers. None of it is measured. Low and high are plus or minus 50% of base, the rule for fewer than three months of data.
 
 The workbook reads `inputs/usage-actuals.json`. When that file has numbers, the `UsageActuals` sheet replaces each assumption with the measured mean on its own, and with P25 and P90 once a metric has three clean months.
 
@@ -54,11 +54,10 @@ Two things in this table matter for pricing:
 - The browser leg runs longer than the phone leg. It is billed on unanswered attempts too, if the audit's reading is right. That makes it about a fifth of voice cost.
 - At 60 attempts a day a seat uses about 2,020 customer minutes, well above the 1,200 in the starting hypothesis. The 1,200 allowance only holds margin if overage is charged, or if real usage is closer to 26 attempts a day.
 
-## Texting, per tenant per month
+## Texting, per seat per month
 
 | Driver (ASSUMPTION) | Base |
 | --- | --- |
-| Seats per tenant | 4 |
 | New leads per seat per month | 100 |
 | Automated texts per lead | 6 |
 | Segments per automated text | 1.6 |
@@ -69,22 +68,20 @@ Two things in this table matter for pricing:
 
 | Metric | Low | Base | High | n | Basis |
 | --- | --- | --- | --- | --- | --- |
-| Outbound segments | 2,466 | 4,932 | 7,398 | 0 | ASSUMPTION |
-| Inbound segments | 100 | 200 | 300 | 0 | ASSUMPTION |
+| Outbound segments per seat | 617 | 1,233 | 1,850 | 0 | ASSUMPTION |
+| Inbound segments per seat | 25 | 50 | 75 | 0 | ASSUMPTION |
 
-A tenant that runs a six-step follow-up on 400 leads uses about five times the 1,000 segments in the starting SMS add-on.
+At 4 seats that is 4,932 outbound segments a tenant, about five times the 1,000 in the starting SMS add-on.
 
 ## Zoho API credits per call
 
 Counted from the code, not measured: one search and one insert when Twilio reports the call, and the same again when the widget reports it. That is 4 API calls per logged call if both paths fire, 2 if only one does. Zoho's published weights (read 2026-10-04) are 1 credit for a search and 1 credit for an insert of up to 10 records, so 4 credits a call. At the base profile, four seats make about 272 logged calls a day, so about 1,088 credits a day. An Enterprise org with four users is allowed 54,000 a day (50,000 plus 1,000 a user); the first client's allowance was 53,000 when last read (2026-10-01, prior observation). This is a ceiling to watch, not a cost.
 
-## SendBlue contacts per day
+## AI texting per tenant
 
-ASSUMPTION: the leads that reply are the conversations the AI handles. 400 leads at 25% is 100 conversations a month, about 3.3 new inbound contacts a day on average. No maximum can be given without data. SendBlue publishes a limit of 1,000 inbound contacts per line per rolling 24 hours on the $100 plan (read 2026-10-04), so one line is far more than this profile needs: the cost is the flat fee, not the limit.
+SendBlue is not in use, so there is no per-line metric. The AI texts go out on Twilio messaging.
 
-## AI usage per conversation
-
-ASSUMPTION: 4 AI turns per conversation, about 3,500 input and 300 output tokens a turn. No token counts were pulled.
+ASSUMPTION: the leads that reply are the conversations the AI handles. 400 leads at 25% is 100 conversations a month. Each takes 4 AI replies of 1.6 segments, 4 inbound segments, and about 3,500 input and 300 output tokens a reply. No token counts were pulled.
 
 ## Prior observations (not from this pull, not used as actuals)
 

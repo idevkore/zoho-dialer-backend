@@ -7,7 +7,13 @@ Repositories read:
 - **backend**: this repo at `origin/dev` `f417d99`.
 - **widget**: `zoho-dialer-widget`. Its `app/` is synced into this repo at `src/public/app/`, so widget paths below are given in this repo.
 - **client site**: the first client's website and portal repo (`TMG.Web`, `develop`). It is where Zoho Voice, Twilio messaging, the AI texting and Netlify are used today.
-- The HaulOS Zoho configuration repo and the HaulOS marketing site were checked for the in-scope tools and add no metered usage.
+- The HaulOS Zoho configuration repo, the HaulOS marketing site and the meeting agent were checked and add no metered usage beyond what is listed.
+
+## How the stack was established
+
+From the code, not from a list: every outside host the source calls, every SDK in a `package.json` or `composer.json`, and every setting the functions read. That gives Twilio (voice, messaging, Studio, Functions, Voice Insights, Lookup, WhatsApp, email), Zoho CRM, Zoho Voice, the Anthropic API, Netlify (functions, database, blobs, sign-in), the Meta Graph API, the client's Granot system, Laravel Forge, Railway and GitHub.
+
+**SendBlue is not in the stack.** No repository has SendBlue code, a SendBlue setting or a SendBlue dependency, and it was canceled for the first client on 2026-08-27 (request-board card 48). It is removed from the model. The AI texting that exists runs on Twilio messaging and on the agents' Zoho Voice lines.
 
 "Who pays" is the owner of the account the code is pointed at. For the dialer that is whichever Twilio account sits in `TWILIO_<slug>_ACCOUNT_SID` (`src/config/tenants.js:130`): Kore for the `kore` tenant, undecided for clients.
 
@@ -33,8 +39,19 @@ Repositories read:
 | Zoho CRM licenses | n/a | Per user per month by edition | Tenant pays Zoho directly | UNVERIFIED. Reseller margin 0% until the partner application is approved |
 | Zoho Voice: seats and minutes | n/a (the client's dialer) | Per user per month by plan; per-minute calls; number rental | Tenant pays Zoho directly | Request-board card 63: Solo tier, 2 users |
 | Zoho Voice: texting | client site `src/lib/zoho-voice.ts:782` (send), `:518` and `:562` (log polls from every-minute functions) | Per message; a documented limit of 20 requests a minute shared by agents and automation (`zoho-voice.ts:425`) | Tenant | Code. Per-message rate UNVERIFIED |
-| SendBlue | No code in any repo | Flat fee per line per month; per-line limits | Kore, when built | Sandbox only. Canceled for the first client on 2026-08-27 (card 48) |
-| AI for texting | client site `src/lib/appointment-setter.ts:27,462` (top-tier model, 4,000 output tokens, one call per reply), `netlify/functions/qualify-intent.js:64,158` (small model, 300 tokens) | Input and output tokens | UNVERIFIED (owner of the API key) | Code. The planned TAC middleware has no code yet |
+| SendBlue | Not used | n/a | n/a | No code, setting or dependency anywhere. Dropped from the model |
+| AI for texting: the model | client site `netlify/functions/qualify-intent.js:64,158` (small model, 300 output tokens, one call per answer in the qualification texts), `src/lib/appointment-setter.ts:27,462` (top-tier model, 4,000 output tokens, one call per reply) | Input and output tokens | UNVERIFIED (owner of the API key) | Code. The planned TAC middleware has no code yet |
+| AI for texting: the texts | client site `twilio/studio/lead-qualification/build-flow.mjs` (Twilio Studio flow on the Messaging Service), `netlify/functions/sms-conversations.js:271` (replies from the agent's Zoho Voice line) | Twilio: per segment plus carrier fee. Zoho Voice: per message | The client's Twilio account; the client's Zoho Voice account | Code. There is no per-line AI texting fee anywhere in the stack |
+| AI elsewhere in the client site | `src/lib/haulos-helper.ts:68,372` (help answers), `src/lib/whatsapp-todo.ts:143,546` (requests by WhatsApp) | Input and output tokens | UNVERIFIED | Code. Not part of any priced add-on: a platform cost |
+| Twilio Voice Insights | client site `src/lib/call-sync.ts:824-828` → `src/lib/twilio-voice-api.ts:443-453` (a call summary for every tracked call, from a function that runs every 2 minutes) | Per minute of each call summarized | The client's Twilio account | Code. A surcharge on every lead-line minute |
+| Twilio text-to-speech | client site `twilio/studio/inbound-lead-routing/build-flow.mjs:53`, `twilio/voicemail/functions/voicemail.js:10`, `recording-complete.js:45,64` (a premium voice) | Per use | Same | Code |
+| Twilio Lookup | client site `scripts/qualify-backfill.mjs:101` (line type) | Per lookup | Same | Code. A script, run by hand |
+| Twilio Studio and Functions | client site `twilio/studio/*` (2 flows), `twilio/voicemail/functions/*` | Flow executions; function invocations. Both have a free allowance | Same | Code |
+| Twilio WhatsApp | client site `src/lib/whatsapp-team.ts:109` | Per conversation or template message | Same | Code. An internal request line, not a tenant feature |
+| Twilio email | client site `src/lib/lead-email.ts:148` | Per email | Same | Code. Lead notices and helper emails |
+| Meta Graph API | client site `src/lib/meta-graph.ts` | None | n/a | Lead forms. No charge |
+| Granot | client site `src/lib/granot.ts` | The client's own subscription | Tenant | Not a HaulOS cost |
+| Railway | meeting agent `railway.json` | Service hours | Kore | Internal tool. Not a tenant cost |
 | Laravel Forge | `ecosystem.config.cjs`, `scripts/pm2-forge-resync.sh`, README "Laravel Forge" | Flat subscription per month | Kore | Plan UNVERIFIED |
 | AWS EC2 (`dk-services`) | Same; one PM2 process, fork mode | Instance hours, disk, public IPv4, data out | Kore | Instance type and what else shares the server UNVERIFIED |
 | GitHub | Org `idevkore`. No workflows in this repo. Client site has `ci.yml` and `deploy.yml` | Seats; Actions minutes on private repos | Kore | Org plan read 2026-10-04: Free, 1 seat. $0 today |
@@ -57,11 +74,14 @@ Ranked by exposure.
 7. **Every seat is the same identity.** The widget sends the agent's identity in an `X-Identity` header (`src/public/app/js/token-service.js:49-51`); the route reads a query parameter (`src/routes/token.js:20-23`). So every browser registers as `agent` and an inbound call rings all of them. With no `answerOnBridge`, Twilio also answers the inbound call before an agent picks up, so an unanswered inbound call would be billed: UNVERIFIED against a bill.
 8. **State lives in memory.** The recording-URL map is never cleared (`src/services/callLogger.js:7`) and the Zoho token cache is per process (`src/services/zohoService.js:11`). A second instance, or frequent deploys, multiplies token refreshes, which Zoho rations.
 9. **A re-sent webhook duplicates.** `/events` answers Twilio before it does the Zoho work (`src/routes/events.js:36-44`), which avoids retries from slow Zoho calls. There is still no idempotency on the insert. Likelihood low: UNVERIFIED.
-10. **Client site: fixed costs that do not scale with use.** The every-minute schedules keep the database awake, which was about 80% of the hosting credits when measured. Every AI text reply runs on the most expensive model tier. Both are choices, not bugs, and both set the floor under the AI SMS add-on.
+10. **Client site: fixed costs that do not scale with use.** The every-minute schedules keep the database awake, which was about 80% of the hosting credits when measured. The appointment-setting replies are written for the most expensive model tier. Both are choices, not bugs.
+11. **Client site: every tracked call is summarized.** The call sync reads a Voice Insights summary for each call, and that is billed per minute of the call. It is a quiet surcharge on all lead-line minutes.
+12. **Long automated texts.** Twilio bills per 153-character segment and adds a carrier fee to each. A text with a greeting, a question and a signature is two or three segments, so it costs two or three times a short one.
 
 ## What this means for pricing
 
 - The dialer's cost is three meters per outbound minute (PSTN, browser leg, recording) plus a storage tail. The model prices all three and carries the storage tail by tenant age.
 - Until item 1 is closed, included minutes are a promise Kore cannot bound. The dialer add-on should not be sold on a Kore-paid Twilio account before the token route is authenticated.
 - Zoho API credits are not a dollar cost. They are a ceiling: a busy seat logging every dial attempt twice draws the allowance four times per call.
-- SendBlue and the AI are the only in-scope tools with a fixed monthly cost per tenant. That is why AI SMS has a price floor and the other add-ons do not.
+- No tool in use has a fixed monthly cost per tenant for AI texting. With SendBlue gone, AI SMS costs what its texts and its model calls cost, so its price is a question of value, not of a cost floor.
+- The lead lines the client site runs on Twilio (calls, Voice Insights, voice prompts, numbers) are a platform cost the model has no figure for yet.

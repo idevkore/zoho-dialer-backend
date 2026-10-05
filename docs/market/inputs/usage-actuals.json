@@ -37,14 +37,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -84,14 +76,6 @@
             "opt_outs": null,
             "filtered_errors": null,
             "carrier_fee_usd": null
-          },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
           },
           "zoho_crm": {
             "licensed_users": null,
@@ -133,14 +117,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -180,14 +156,6 @@
             "opt_outs": null,
             "filtered_errors": null,
             "carrier_fee_usd": null
-          },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
           },
           "zoho_crm": {
             "licensed_users": null,
@@ -235,14 +203,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -282,14 +242,6 @@
             "opt_outs": null,
             "filtered_errors": null,
             "carrier_fee_usd": null
-          },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
           },
           "zoho_crm": {
             "licensed_users": null,
@@ -331,14 +283,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -378,14 +322,6 @@
             "opt_outs": null,
             "filtered_errors": null,
             "carrier_fee_usd": null
-          },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
           },
           "zoho_crm": {
             "licensed_users": null,
@@ -433,14 +369,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -480,14 +408,6 @@
             "opt_outs": null,
             "filtered_errors": null,
             "carrier_fee_usd": null
-          },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
           },
           "zoho_crm": {
             "licensed_users": null,
@@ -529,14 +449,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -577,14 +489,6 @@
             "filtered_errors": null,
             "carrier_fee_usd": null
           },
-          "sendblue": {
-            "lines": null,
-            "inbound_contacts_per_day_avg": null,
-            "inbound_contacts_per_day_max": null,
-            "msgs_in": null,
-            "msgs_out": null,
-            "plan": null
-          },
           "zoho_crm": {
             "licensed_users": null,
             "edition": null,
@@ -602,18 +506,17 @@
   ],
   "billed_costs_by_category": [],
   "notes": [
-    "NO USAGE WAS RETRIEVED IN THIS PULL. Every metric is null. Nothing here is estimated. See pull-log.md for what was tried.",
+    "NO USAGE IS IN THIS FILE YET. Every metric is null. Nothing here is estimated. See pull-log.md.",
+    "Shape: the sendblue block from the brief is removed. SendBlue is not in use: there is no SendBlue code, setting or dependency in any HaulOS repository or in the client site.",
     "2026-10 is month-to-date (2026-10-01 to 2026-10-04).",
+    "The Moving Group production: a second, read-only pass on 2026-10-04 did return monthly aggregates from the client site's Twilio account, Zoho CRM, the Zoho Voice call and text logs and the site database. They are NOT in this file: the session was not permitted to write them into the repository. They are held outside it until that is approved.",
     "Twilio (HaulOS account): UNAVAILABLE. No tool in the session is signed in to it. The two saved Twilio CLI profiles were identified by their TwiML application list only; neither has an application pointing at the HaulOS dialer backend, so neither was queried further. The desktop Twilio connector is bound to another project's account and has no usage endpoints. billed_costs_by_category is empty for the same reason.",
-    "The Moving Group production (Zoho CRM, Zoho Voice, the client's own Twilio account, the client website database): reachable through the client website repo's own read-only scripts, but the read was stopped by the session's permission check on production reads before any request was sent. NOT PULLED. Re-run with that read allowed to fill the the-moving-group block.",
     "Zoho CRM (Kore org and sandbox): UNAVAILABLE. The HaulOS Zoho configuration tool holds settings-scope tokens (fields, layouts, pipeline, roles, profiles, views, workflows) and has no read path for org, users or records.",
-    "SendBlue: UNAVAILABLE. No connector, CLI or code in any HaulOS repository.",
     "Zoho Marketing Automation: UNAVAILABLE. Not in use; no tool.",
     "10DLC brand and campaign status and fees for the HaulOS account: not retrievable (Twilio unavailable).",
     "PRIOR OBSERVATION, not from this pull (2026-09-30 probe of The Moving Group's Zoho Voice): 2 Zoho Voice users, 3 lines (2 that text, 1 calls only). Request-board card 63 (2026-09-03) records the plan as the Solo tier.",
     "PRIOR OBSERVATION, not from this pull (2026-10-01 capacity study of the client website): Zoho CRM API allowance 53,000 credits a day for The Moving Group's org; Zoho Voice documents 20 requests a minute; the client's own Twilio account held 7 numbers.",
     "PRIOR OBSERVATION, not from this pull (2026-10-01 capacity study): the Netlify team that hosts the client website is on the credit-based Pro plan ($20 for 3,000 credits) and was using about 9,000 credits a month (about $60), about 80% of it database compute kept awake by every-minute schedules; five sites share the credit pool.",
-    "PRIOR OBSERVATION, not from this pull (request-board card 48): SendBlue was canceled for The Moving Group on 2026-08-27 because the recipient has to message first; no material spend.",
     "Dev and ramp-up warning: the first client is still deploying. When this file is filled, treat kore/dev and kore-sandbox as test traffic and 2026-07 to 2026-09 as ramp-up for the-moving-group."
   ]
 }

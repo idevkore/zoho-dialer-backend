@@ -160,8 +160,6 @@ GROUPS = [
                'recorded_min', 'voicemail_drops', 'amd_calls', 'active_agents', 'peak_concurrent']),
     ('sms', ['msgs_out', 'msgs_in', 'segments_out', 'segments_in', 'delivery_rate', 'opt_outs',
              'filtered_errors', 'carrier_fee_usd']),
-    ('sendblue', ['lines', 'inbound_contacts_per_day_avg', 'inbound_contacts_per_day_max', 'msgs_in',
-                  'msgs_out', 'plan']),
     ('zoho_crm', ['licensed_users', 'edition', 'api_credits_per_day_avg', 'api_credits_per_day_peak',
                   'api_credit_limit', 'call_records_created']),
     ('zoho_marketing', ['sends']),
@@ -175,9 +173,8 @@ PROFILE = [
     ('rec_min', 'Recorded minutes', 'per seat / month', [('voice', 'recorded_min')], True, 'd_rec_min'),
     ('calls', 'Calls, out plus in', 'per seat / month', [('voice', 'calls_out'), ('voice', 'calls_in')], True, 'd_calls'),
     ('amd_calls', 'Answering-machine-detection calls', 'per seat / month', [('voice', 'amd_calls')], True, 'd_amd'),
-    ('seg_out', 'Outbound SMS segments', 'per tenant / month', [('sms', 'segments_out')], False, 'd_seg_out'),
-    ('seg_in', 'Inbound SMS segments', 'per tenant / month', [('sms', 'segments_in')], False, 'd_seg_in'),
-    ('sb_contacts', 'New inbound contacts (SendBlue)', 'per day', [('sendblue', 'inbound_contacts_per_day_avg')], False, 'd_sb_contacts'),
+    ('seg_out', 'Outbound SMS segments', 'per seat / month', [('sms', 'segments_out')], True, 'd_seg_out'),
+    ('seg_in', 'Inbound SMS segments', 'per seat / month', [('sms', 'segments_in')], True, 'd_seg_in'),
     ('ai_convos', 'AI conversations', 'per tenant / month', None, False, 'd_ai_convos'),
 ]
 
@@ -324,7 +321,7 @@ def github_cost():
 def build_unit_economics(wb):
     ws = wb.create_sheet('UnitEconomics')
     title(ws, 'Unit economics',
-          'Cost of each in-scope tool at low, base and high usage. Low and high are P25 and P90 of the actuals, '
+          'Cost of each tool in use at low, base and high usage. Low and high are P25 and P90 of the actuals, '
           'or plus or minus the band on base when there are under three months.', 6)
     header(ws, 4, ['Line', 'Unit', 'Low', 'Base', 'High', 'Note'])
     state = {'row': 5}
@@ -359,10 +356,9 @@ def build_unit_economics(wb):
     state['row'] += 1
 
     sect('Usage, per tenant per month')
-    line('seg_out', 'Outbound SMS segments', 'segments', '{u:seg_out}', 'int')
-    line('seg_in', 'Inbound SMS segments', 'segments', '{u:seg_in}', 'int')
+    line('seg_out', 'Outbound SMS segments', 'segments', '{u:seg_out}*{seats}', 'int', 'Per seat, times the seats.')
+    line('seg_in', 'Inbound SMS segments', 'segments', '{u:seg_in}*{seats}', 'int')
     line('ai_convos', 'AI conversations', 'conversations', '{u:ai_convos}', 'int')
-    line('sb_contacts', 'New inbound contacts a day', 'contacts', '{u:sb_contacts}', 'num')
     state['row'] += 1
 
     sect('Twilio Programmable Voice: cost per dialer seat per month')
@@ -416,15 +412,16 @@ def build_unit_economics(wb):
          'Counts one text per segment.')
     state['row'] += 1
 
-    sect('SendBlue and the AI model: cost per tenant per month')
-    line('sb_tenant', 'SendBlue lines', '$', '{sb_lines}*{sb_line}')
+    sect('AI SMS: cost per tenant per month')
+    line('ai_msg', 'Texts the AI sends and receives, on Twilio', '$',
+         '{r:ai_convos}*{ai_turns}*({ai_seg_out}*({tw_sms_out}+{tw_car_out})+{ai_seg_in}*({tw_sms_in}+{tw_car_in}))', 'usd',
+         'No per-line fee: the AI texts ride the same Twilio messaging as the SMS add-on.')
     line('ai_llm', 'AI model tokens', '$',
          '{r:ai_convos}*{ai_turns}*({tok_in}*{llm_in}+{tok_out}*{llm_out})/1000000')
-    line('ai_tenant', 'AI SMS per tenant', '$', '{r:sb_tenant}+{r:ai_llm}', strong=True)
-    line('sb_util', 'Share of the line limit used', '%', '{r:sb_contacts}/({sb_limit}*{sb_lines})', 'pct')
+    line('ai_tenant', 'AI SMS per tenant', '$', '{r:ai_msg}+{r:ai_llm}', strong=True)
     state['row'] += 1
 
-    sect("Hosting, client site and GitHub: per tenant at today's tenant count")
+    sect("Platform: hosting, client site, lead lines and GitHub, per tenant at today's tenant count")
     n = a('start_tenants')
     r = state['row']
     for label, name, expr in (
@@ -441,7 +438,9 @@ def build_unit_economics(wb):
         state['row'] += 1
     put(ws, f'F{UE["h_host"]}', 'Falls quickly as tenants are added: see the Hosting sheet.', size=9, color=MUTED)
     put(ws, f'F{UE["h_site"]}', 'Does not fall: each tenant site uses its own credits.', size=9, color=MUTED)
-    line('h_platform', 'Platform per tenant', '$', '{r:h_host}+{r:h_site}+{r:h_git}', strong=True)
+    line('h_lines', 'Lead lines on Twilio', '$', '{pl_twilio}+{pl_numbers}', 'usd',
+         "From the first client's bill. Scales with a tenant's lead calls, not with tenant count.")
+    line('h_platform', 'Platform per tenant', '$', '{r:h_host}+{r:h_site}+{r:h_git}+{r:h_lines}', strong=True)
     state['row'] += 1
 
     sect('Cost to serve by product, per tenant that takes it, per month')
@@ -741,7 +740,7 @@ def build_forecast(wb):
           'Tenants ramp to a share of the addressable firms at month 24. Revenue and cost per tenant come from Tiers.', 15)
     scenarios = [('Low', 'pen_low'), ('Base', 'pen_base'), ('High', 'pen_high')]
     cols = ['Month', 'Active tenants', 'New tenants', 'Platform MRR', 'Add-on MRR', 'Overage and resale MRR',
-            'Total MRR', 'ARR run rate', 'One-time fees', 'Cost: usage', 'Cost: hosting and sites',
+            'Total MRR', 'ARR run rate', 'One-time fees', 'Cost: usage', 'Cost: hosting, sites and lead lines',
             'Cost: one-time', 'Gross profit', 'Gross margin', 'Cumulative revenue']
 
     header(ws, 4, ['Scenario', 'Share of firms at month 24', 'Addressable firms', 'Tenants, month 12',
@@ -767,7 +766,8 @@ def build_forecast(wb):
             put(ws, f'H{r}', f'=G{r}*12', 'usd0')
             put(ws, f'I{r}', f"=C{r}*{tiers('once_rev')}", 'usd0')
             put(ws, f'J{r}', f"=B{r}*{tiers('varcost')}", 'usd0')
-            put(ws, f'K{r}', f'={host_parts(f"B{r}")[2]}+{netlify_at(f"B{r}")}+{github_cost()}', 'usd0')
+            put(ws, f'K{r}', (f'={host_parts(f"B{r}")[2]}+{netlify_at(f"B{r}")}+{github_cost()}'
+                              f"+B{r}*({a('pl_twilio')}+{a('pl_numbers')})"), 'usd0')
             put(ws, f'L{r}', f"=C{r}*{tiers('once_cost')}", 'usd0')
             put(ws, f'M{r}', f'=G{r}+I{r}-J{r}-K{r}-L{r}', 'usd0')
             put(ws, f'N{r}', f'=IF(G{r}+I{r}>0,M{r}/(G{r}+I{r}),0)', 'pct')

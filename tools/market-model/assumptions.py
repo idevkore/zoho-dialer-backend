@@ -18,7 +18,6 @@ ZOHO_CRM = f'zoho.com/en-us/crm/zohocrm-pricing.html and comparison page, read {
 ZOHO_API = f'zoho.com/crm/developer/docs/api/v8/api-limits.html, read {READ}'
 ZOHO_VOICE = f'zoho.com/voice/pricing.html, read {READ}'
 ZOHO_MA = f'zoho.com/marketingautomation/pricing.html and sms-pricing.html, read {READ}'
-SENDBLUE = f'sendblue.com/pricing and docs.sendblue.com/limits, read {READ}'
 FORGE = f'laravel.com/forge/pricing, read {READ}'
 AWS = f'AWS price feed for us-east-1 (published 2026-09-25), read {READ}'
 AZURE = f'azure.microsoft.com pricing pages, East US, read {READ}'
@@ -142,7 +141,7 @@ SECTIONS = [
         D('d_calls', 'Calls per seat per month', '{d_attempts}+{d_in_calls}', 'calls', 'int'),
         D('d_amd', 'Answering-machine-detection calls per seat', '{d_attempts}*{amd_on}', 'calls', 'int'),
     ]),
-    ('Texting: what a tenant sends', [
+    ('Texting: what a seat sends', [
         I('texts_per_lead', 'Automated texts per lead', 6, 'texts', 'num', NONE, 'ASSUMPTION'),
         I('seg_per_text', 'Segments per automated text', 1.6, 'segments', 'num', NONE, 'ASSUMPTION',
           'A text with a signature line usually runs past 160 characters.'),
@@ -150,9 +149,9 @@ SECTIONS = [
         I('seg_manual', 'Segments per typed text', 1.3, 'segments', 'num', NONE, 'ASSUMPTION'),
         I('reply_rate', 'Leads that reply', 0.25, '%', 'pct', NONE, 'ASSUMPTION'),
         I('in_per_reply', 'Inbound messages per replying lead', 2, 'messages', 'num', NONE, 'ASSUMPTION'),
-        D('d_seg_out', 'Outbound segments per tenant per month',
-          '{d_leads}*{texts_per_lead}*{seg_per_text}+{seats}*{workdays}*{manual_day}*{seg_manual}', 'segments', 'int'),
-        D('d_seg_in', 'Inbound segments per tenant per month', '{d_leads}*{reply_rate}*{in_per_reply}',
+        D('d_seg_out', 'Outbound segments per seat per month',
+          '{leads_per_seat}*{texts_per_lead}*{seg_per_text}+{workdays}*{manual_day}*{seg_manual}', 'segments', 'int'),
+        D('d_seg_in', 'Inbound segments per seat per month', '{leads_per_seat}*{reply_rate}*{in_per_reply}',
           'segments', 'int'),
     ]),
     ('AI SMS: what a tenant uses', [
@@ -160,8 +159,9 @@ SECTIONS = [
         I('tok_in', 'Input tokens per AI reply', 3500, 'tokens', 'int', NONE, 'ASSUMPTION',
           'Instructions plus the thread so far.'),
         I('tok_out', 'Output tokens per AI reply', 300, 'tokens', 'int', NONE, 'ASSUMPTION'),
+        I('ai_seg_out', 'Segments per AI text', 1.6, 'segments', 'num', NONE, 'ASSUMPTION'),
+        I('ai_seg_in', 'Segments per reply', 1.0, 'segments', 'num', NONE, 'ASSUMPTION'),
         D('d_ai_convos', 'AI conversations per tenant per month', '{d_leads}*{reply_rate}', 'conversations', 'int'),
-        D('d_sb_contacts', 'New inbound contacts per day', '{d_ai_convos}/30', 'contacts / day', 'num'),
     ]),
     ('Twilio Programmable Voice, US', [
         I('tw_out', 'Outbound to a US number', 0.0140, '$ / minute', 'usd4', TW_VOICE, 'High'),
@@ -221,16 +221,10 @@ SECTIONS = [
         I('zma_fixed', 'Zoho Marketing Automation, number and 10DLC campaign', 11, '$ / month', 'usd', ZOHO_MA, 'High',
           '$1 long code plus $10 campaign fee.'),
     ]),
-    ('SendBlue', [
-        I('sb_line', 'Dedicated line, AI Agent plan', 100, '$ / line / month', 'usd', SENDBLUE, 'High',
-          'Flat, no per-message fee, inbound-first. A SendBlue blog post (2026-04-09) says $29 for a '
-          '"Starter plan" that is not on the pricing page.'),
-        I('sb_lines', 'Lines per tenant', 1, 'lines', 'int', NONE, 'ASSUMPTION'),
-        I('sb_limit', 'Inbound contacts allowed per line per day', 1000, 'contacts', 'int', SENDBLUE, 'High'),
-    ]),
     ('AI model', [
         I('llm_in', 'Input tokens', 4, '$ / million tokens', 'usd', CLAUDE, 'High',
-          'The top-tier model the client site uses for text replies. The small model is $1.'),
+          'The top-tier model, which the appointment-setting replies use (src/lib/appointment-setter.ts in the '
+          'client site). The qualification step uses the small model at $1.'),
         I('llm_out', 'Output tokens', 20, '$ / million tokens', 'usd', CLAUDE, 'High', 'The small model is $5.'),
     ]),
     ('Hosting today: Laravel Forge and AWS EC2', [
@@ -272,6 +266,16 @@ SECTIONS = [
         I('gh_seat', 'GitHub plan', 0, '$ / user / month', 'usd', f'Org plan read {READ}: Free', 'High',
           'Team is $4 a user.'),
         I('gh_seats', 'GitHub seats', 1, 'users', 'int', f'Org read {READ}', 'High'),
+    ]),
+    ('Lead lines on Twilio (part of the platform)', [
+        I('pl_twilio', 'Lead-line calls, call insights and voice prompts', 0, '$ / tenant / month', 'usd',
+          'Not costed: needs the usage on the client site\'s Twilio account', 'ASSUMPTION',
+          'The client site routes inbound lead calls on Twilio (Studio flow, voicemail functions), reads a Voice '
+          'Insights summary for each call and speaks prompts with a text-to-speech voice. All three are billed. '
+          'Zero is a placeholder, not a finding.'),
+        I('pl_numbers', 'Lead-line numbers', 0, '$ / tenant / month', 'usd',
+          'Not costed: needs the number count on the client site\'s Twilio account', 'ASSUMPTION',
+          'A local number is $1.15 a month and a toll-free number $2.15.'),
     ]),
     ('Compliance module', [
         I('comp_cogs', 'Cost to serve', 1, '$ / tenant / month', 'usd', NONE, 'ASSUMPTION',
